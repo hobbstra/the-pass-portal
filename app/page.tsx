@@ -1,5 +1,6 @@
 import PageShell from "@/components/PageShell";
-import FeatureCard from "@/components/FeatureCard";
+import FeatureRow from "@/components/FeatureRow";
+import { ScheduleClip, InventoryClip, RecipeClip, FinanceClip } from "@/components/FeatureClips";
 
 export default function Home() {
   return (
@@ -63,29 +64,30 @@ export default function Home() {
       </section>
 
       <section className="max-w-4xl mx-auto px-6 pb-24">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          <FeatureCard
-            index={0}
-            title="Scheduling & timesheets"
-            body="Build the schedule, track availability and shift swaps, and clock in and out — all reconciled against real payroll data."
-          />
-          <FeatureCard
-            index={1}
-            title="Inventory & ordering"
-            body="Count stock, track par levels, and turn a count into a supplier order without a manual text list."
-          />
-          <FeatureCard
-            index={2}
-            title="Recipes & production"
-            body="Batch-scale recipes accurately, schedule production, and print tub labels and market placards straight from the app."
-            gridLines
-          />
-          <FeatureCard
-            index={3}
-            title="Wholesale & finances"
-            body="Track wholesale deliveries and invoices, and mirror your Square and QuickBooks data into one financial picture."
-          />
-        </div>
+        <FeatureRow
+          index={1}
+          title="Scheduling & timesheets"
+          body="Build the schedule, track availability and shift swaps, and clock in and out — all reconciled against real payroll data."
+          clip={<ScheduleClip />}
+        />
+        <FeatureRow
+          index={2}
+          title="Inventory & ordering"
+          body="Count stock, track par levels, and turn a count into a supplier order without a manual text list."
+          clip={<InventoryClip />}
+        />
+        <FeatureRow
+          index={3}
+          title="Recipes & production"
+          body="Batch-scale recipes accurately, schedule production, and print tub labels and market placards straight from the app."
+          clip={<RecipeClip />}
+        />
+        <FeatureRow
+          index={4}
+          title="Wholesale & finances"
+          body="Track wholesale deliveries and invoices, and mirror your Square and QuickBooks data into one financial picture."
+          clip={<FinanceClip />}
+        />
       </section>
     </PageShell>
   );
