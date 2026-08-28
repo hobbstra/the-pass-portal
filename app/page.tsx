@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <PageShell>
       <section className="max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
-        <h1 className="text-5xl font-semibold leading-tight mb-6" style={{ color: "var(--ink)" }}>
+        <h1 className="text-5xl font-bold leading-tight mb-6" style={{ color: "var(--ink)" }}>
           Everything that converges before it goes out.
         </h1>
         <p className="text-xl leading-relaxed mb-10" style={{ color: "var(--ink-muted)" }}>
@@ -14,8 +14,8 @@ export default function Home() {
         </p>
         <a
           href="mailto:support@thepass.cloud"
-          className="inline-block font-sans-ui text-sm font-medium px-6 py-3 rounded-full text-white"
-          style={{ background: "var(--accent)" }}
+          className="inline-block font-sans-ui text-sm font-bold px-6 py-3 rounded-full transition hover:brightness-110"
+          style={{ backgroundImage: "var(--accent-gradient)", color: "#0d0716" }}
         >
           Get in touch
         </a>
@@ -34,6 +34,7 @@ export default function Home() {
           <FeatureCard
             title="Recipes & production"
             body="Batch-scale recipes accurately, schedule production, and print tub labels and market placards straight from the app."
+            gridLines
           />
           <FeatureCard
             title="Wholesale & finances"
@@ -45,16 +46,35 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ title, body }: { title: string; body: string }) {
+function FeatureCard({
+  title,
+  body,
+  gridLines,
+}: {
+  title: string;
+  body: string;
+  gridLines?: boolean;
+}) {
   return (
     <div
-      className="rounded-xl border p-6"
-      style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}
+      className="relative overflow-hidden rounded-xl border p-6"
+      style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
     >
-      <h3 className="text-lg font-semibold mb-2" style={{ color: "var(--ink)" }}>
+      {gridLines && (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2"
+          style={{
+            backgroundImage: `repeating-linear-gradient(to right, var(--grid-line) 0 1px, transparent 1px 48px), repeating-linear-gradient(to bottom, var(--grid-line) 0 1px, transparent 1px 48px)`,
+            maskImage: "linear-gradient(to top, black, transparent)",
+            WebkitMaskImage: "linear-gradient(to top, black, transparent)",
+          }}
+          aria-hidden="true"
+        />
+      )}
+      <h3 className="relative text-lg font-bold mb-2" style={{ color: "var(--ink)" }}>
         {title}
       </h3>
-      <p className="text-sm leading-relaxed font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+      <p className="relative text-sm leading-relaxed font-sans-ui" style={{ color: "var(--ink-muted)" }}>
         {body}
       </p>
     </div>

@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { Lora } from "next/font/google";
 import "./globals.css";
-
-const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 
 export const metadata: Metadata = {
   title: "The Pass — Restaurant & Bakery Operations Platform",
@@ -12,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={lora.variable}>
+    <html lang="en">
       <body>{children}</body>
     </html>
   );
