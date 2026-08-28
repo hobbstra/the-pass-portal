@@ -5,12 +5,7 @@ export default function PageShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col">
       <header className="border-b" style={{ borderColor: "var(--border)" }}>
         <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between font-sans-ui">
-          <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
-            <span
-              className="inline-block h-3 w-3 rounded-full"
-              style={{ backgroundImage: "var(--accent-gradient)" }}
-              aria-hidden="true"
-            />
+          <Link href="/" className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
             The Pass
           </Link>
           <nav className="text-sm flex gap-6" style={{ color: "var(--ink-muted)" }}>
