@@ -1,10 +1,13 @@
 import PageShell from "@/components/PageShell";
 import FeatureRow from "@/components/FeatureRow";
+import ScrollJourneyLazy from "@/components/ScrollJourneyLazy";
 import { ScheduleClip, InventoryClip, RecipeClip, FinanceClip } from "@/components/FeatureClips";
 
 export default function Home() {
   return (
-    <PageShell>
+    <>
+      <ScrollJourneyLazy />
+      <PageShell>
       <section className="relative overflow-hidden">
         <div
           className="glow-blob pointer-events-none absolute -top-24 -left-24 h-[420px] w-[420px] rounded-full blur-[90px]"
@@ -89,6 +92,7 @@ export default function Home() {
           clip={<FinanceClip />}
         />
       </section>
-    </PageShell>
+      </PageShell>
+    </>
   );
 }
