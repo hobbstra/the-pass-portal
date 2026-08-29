@@ -1,6 +1,7 @@
 import PageShell from "@/components/PageShell";
 import FeatureRow from "@/components/FeatureRow";
 import ScrollJourneyLazy from "@/components/ScrollJourneyLazy";
+import ParallaxWrapper from "@/components/ParallaxWrapper";
 import { ScheduleClip, InventoryClip, RecipeClip, FinanceClip } from "@/components/FeatureClips";
 
 export default function Home() {
@@ -9,7 +10,7 @@ export default function Home() {
       <ScrollJourneyLazy />
       <PageShell>
         <section className="relative overflow-hidden">
-          <div className="relative max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
+          <ParallaxWrapper factor={0.08} className="relative max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
             <h1
               className="fade-up text-5xl font-bold leading-tight mb-6"
               style={{ color: "var(--ink)" }}
@@ -36,7 +37,7 @@ export default function Home() {
             >
               Get in touch
             </a>
-          </div>
+          </ParallaxWrapper>
         </section>
 
         <section className="max-w-4xl mx-auto px-6 pb-24">

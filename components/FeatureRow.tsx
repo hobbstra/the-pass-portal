@@ -1,3 +1,7 @@
+"use client";
+
+import useParallax from "./useParallax";
+
 export default function FeatureRow({
   index,
   title,
@@ -9,8 +13,11 @@ export default function FeatureRow({
   body: string;
   clip?: React.ReactNode;
 }) {
+  const parallaxRef = useParallax<HTMLDivElement>(0.06);
+
   return (
     <div
+      ref={parallaxRef}
       className="fade-in relative border-b py-12 overflow-hidden sm:flex sm:items-center sm:gap-10"
       style={{ borderColor: "var(--border)", animationDelay: `${160 + index * 90}ms` }}
     >
