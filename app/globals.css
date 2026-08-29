@@ -49,11 +49,42 @@ body {
     background-position: 100% 0;
     box-shadow: 0 0 56px -6px var(--glow-pink);
   }
-  .tilt-card {
-    transition: transform 150ms ease-out, box-shadow 300ms ease;
+
+  @keyframes clip-pulse {
+    0%, 100% { opacity: var(--clip-base-opacity, 0.5); }
+    50% { opacity: 1; }
+  }
+  @keyframes clip-grow {
+    from { width: 0%; }
+    to { width: var(--clip-target-width, 100%); }
+  }
+  @keyframes clip-bar-wave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.65); }
+  }
+  @keyframes clip-badge-glow {
+    0%, 100% { opacity: 0.65; }
+    50% { opacity: 1; }
+  }
+
+  .clip-shift {
+    animation: clip-pulse 2.4s ease-in-out infinite;
+  }
+  .clip-bar-fill {
+    animation: clip-grow 1.2s cubic-bezier(0.16, 1, 0.3, 1) both,
+      clip-pulse 3s ease-in-out 1.2s infinite;
+  }
+  .clip-fin-bar {
+    transform-origin: bottom;
+    animation: clip-bar-wave 2.6s ease-in-out infinite;
+  }
+  .clip-badge {
+    animation: clip-badge-glow 2.2s ease-in-out infinite;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fade-up, .fade-in { animation: none; }
+  .fade-up, .fade-in, .clip-shift, .clip-bar-fill, .clip-fin-bar, .clip-badge {
+    animation: none;
+  }
 }

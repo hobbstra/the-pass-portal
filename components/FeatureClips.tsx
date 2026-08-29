@@ -26,11 +26,13 @@ export function ScheduleClip() {
         {shifts.map((on, i) => (
           <div
             key={i}
-            className="h-6 rounded-sm"
+            className={on ? "clip-shift h-6 rounded-sm" : "h-6 rounded-sm"}
             style={{
               background: on ? (i % 2 === 0 ? "var(--accent-pink)" : "var(--accent-cyan)") : "transparent",
               opacity: on ? 0.5 : 0,
               border: on ? "none" : `1px dashed var(--border)`,
+              ["--clip-base-opacity" as string]: 0.5,
+              animationDelay: on ? `${(i % 5) * 220}ms` : undefined,
             }}
           />
         ))}
@@ -48,16 +50,21 @@ export function InventoryClip() {
   return (
     <ClipFrame>
       <div className="space-y-3">
-        {rows.map((r) => (
+        {rows.map((r, i) => (
           <div key={r.label}>
             <div className="flex justify-between items-baseline gap-3 text-[11px] font-sans-ui mb-1" style={{ color: "var(--ink-muted)" }}>
               <span className="flex-1 min-w-0 truncate">{r.label}</span>
               <span className="shrink-0">{r.pct}%</span>
             </div>
-            <div className="h-1.5 rounded-full" style={{ background: "var(--border)" }}>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
               <div
-                className="h-full rounded-full"
-                style={{ width: `${r.pct}%`, backgroundImage: "var(--accent-gradient)" }}
+                className="clip-bar-fill h-full rounded-full"
+                style={{
+                  width: `${r.pct}%`,
+                  backgroundImage: "var(--accent-gradient)",
+                  ["--clip-target-width" as string]: `${r.pct}%`,
+                  animationDelay: `${i * 200}ms, ${1200 + i * 200}ms`,
+                }}
               />
             </div>
           </div>
@@ -76,14 +83,18 @@ export function RecipeClip() {
   return (
     <ClipFrame>
       <div className="space-y-2.5">
-        {rows.map((r) => (
+        {rows.map((r, i) => (
           <div key={r.name} className="flex items-center justify-between">
             <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink)" }}>
               {r.name}
             </span>
             <span
-              className="text-[9px] font-sans-ui font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-              style={{ color: r.color, background: "rgba(255,255,255,0.06)" }}
+              className="clip-badge text-[9px] font-sans-ui font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+              style={{
+                color: r.color,
+                background: "rgba(255,255,255,0.06)",
+                animationDelay: `${i * 260}ms`,
+              }}
             >
               {r.status}
             </span>
@@ -108,11 +119,12 @@ export function FinanceClip() {
         {bars.map((h, i) => (
           <div
             key={i}
-            className="flex-1 rounded-sm"
+            className="clip-fin-bar flex-1 rounded-sm"
             style={{
               height: `${h}%`,
               backgroundImage: "var(--accent-gradient)",
               opacity: 0.35 + (h / 100) * 0.5,
+              animationDelay: `${i * 140}ms`,
             }}
           />
         ))}

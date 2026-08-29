@@ -1,7 +1,7 @@
 import PageShell from "@/components/PageShell";
 import FeatureRow from "@/components/FeatureRow";
 import ScrollJourneyLazy from "@/components/ScrollJourneyLazy";
-import ParallaxWrapper from "@/components/ParallaxWrapper";
+import PinSection from "@/components/PinSection";
 import { ScheduleClip, InventoryClip, RecipeClip, FinanceClip } from "@/components/FeatureClips";
 
 export default function Home() {
@@ -9,8 +9,8 @@ export default function Home() {
     <>
       <ScrollJourneyLazy />
       <PageShell>
-        <section className="relative overflow-hidden">
-          <ParallaxWrapper factor={0.08} className="relative max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
+        <PinSection heightVh={175}>
+          <div className="relative max-w-3xl mx-auto px-6 text-center w-full">
             <h1
               className="fade-up text-5xl font-bold leading-tight mb-6"
               style={{ color: "var(--ink)" }}
@@ -37,34 +37,42 @@ export default function Home() {
             >
               Get in touch
             </a>
-          </ParallaxWrapper>
-        </section>
+          </div>
+        </PinSection>
 
         <section className="max-w-4xl mx-auto px-6 pb-24">
-          <FeatureRow
-            index={1}
-            title="Scheduling & timesheets"
-            body="Build the schedule, track availability and shift swaps, and clock in and out — all reconciled against real payroll data."
-            clip={<ScheduleClip />}
-          />
-          <FeatureRow
-            index={2}
-            title="Inventory & ordering"
-            body="Count stock, track par levels, and turn a count into a supplier order without a manual text list."
-            clip={<InventoryClip />}
-          />
-          <FeatureRow
-            index={3}
-            title="Recipes & production"
-            body="Batch-scale recipes accurately, schedule production, and print tub labels and market placards straight from the app."
-            clip={<RecipeClip />}
-          />
-          <FeatureRow
-            index={4}
-            title="Wholesale & finances"
-            body="Track wholesale deliveries and invoices, and mirror your Square and QuickBooks data into one financial picture."
-            clip={<FinanceClip />}
-          />
+          <PinSection heightVh={175}>
+            <FeatureRow
+              index={1}
+              title="Scheduling & timesheets"
+              body="Build the schedule, track availability and shift swaps, and clock in and out — all reconciled against real payroll data."
+              clip={<ScheduleClip />}
+            />
+          </PinSection>
+          <PinSection heightVh={175}>
+            <FeatureRow
+              index={2}
+              title="Inventory & ordering"
+              body="Count stock, track par levels, and turn a count into a supplier order without a manual text list."
+              clip={<InventoryClip />}
+            />
+          </PinSection>
+          <PinSection heightVh={175}>
+            <FeatureRow
+              index={3}
+              title="Recipes & production"
+              body="Batch-scale recipes accurately, schedule production, and print tub labels and market placards straight from the app."
+              clip={<RecipeClip />}
+            />
+          </PinSection>
+          <PinSection heightVh={175}>
+            <FeatureRow
+              index={4}
+              title="Wholesale & finances"
+              body="Track wholesale deliveries and invoices, and mirror your Square and QuickBooks data into one financial picture."
+              clip={<FinanceClip />}
+            />
+          </PinSection>
         </section>
       </PageShell>
     </>
