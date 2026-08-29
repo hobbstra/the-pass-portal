@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -76,6 +76,79 @@ function GridFloor() {
   return <primitive object={grid} position={[0, 0, -250]} />;
 }
 
+const ORB_COUNT = 24;
+
+// One InstancedMesh (a single draw call) rather than 24 separate <mesh>
+// elements: every orb shares the same sphere geometry and additive material
+// and varies only by transform + per-instance color — exactly the case
+// instancing exists for. At 24 objects individual meshes would also work,
+// but instancing keeps the draw-call count flat if the orb count grows.
+function GlowOrbs() {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const pink = useMemo(() => readToken("--accent-pink"), []);
+  const cyan = useMemo(() => readToken("--accent-cyan"), []);
+
+  // Geometry/material built imperatively so <instancedMesh args> gets real
+  // (non-undefined) constructor arguments, which keeps TypeScript happy.
+  const geometry = useMemo(() => new THREE.SphereGeometry(1, 16, 16), []);
+  const material = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 0.35,
+        blending: THREE.AdditiveBlending, // glows against the dark bg like the old CSS blobs
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+      material.dispose();
+    };
+  }, [geometry, material]);
+
+  // Scatter orbs down the corridor the camera flies through (z from ~+10 to
+  // ~-230), alternating pink/cyan sides, with randomized jitter in position
+  // and scale so they read as drifting lights, not a rigid array. Positions
+  // are computed once per mount; this component is client-only (ssr:false)
+  // so Math.random causes no hydration mismatch.
+  useEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
+    const matrix = new THREE.Matrix4();
+    const color = new THREE.Color();
+    for (let i = 0; i < ORB_COUNT; i++) {
+      const t = i / ORB_COUNT;
+      const side = i % 2 === 0 ? 1 : -1;
+      const scale = 0.5 + Math.random() * 1.1;
+      matrix.makeScale(scale, scale, scale);
+      matrix.setPosition(
+        side * (4 + Math.random() * 10), // off the center line, either side
+        1 + Math.random() * 6, // floating above the grid floor
+        10 - t * 240 + (Math.random() - 0.5) * 16 // spread along the flight path
+      );
+      mesh.setMatrixAt(i, matrix);
+      color.set(i % 2 === 0 ? pink.color : cyan.color);
+      mesh.setColorAt(i, color);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, [pink, cyan]);
+
+  return (
+    <instancedMesh
+      ref={meshRef}
+      args={[geometry, material, ORB_COUNT]}
+      // Instances span far beyond the default bounding sphere; skip culling
+      // so orbs never pop out at the viewport edge.
+      frustumCulled={false}
+    />
+  );
+}
+
 // --- Canvas ----------------------------------------------------------------
 
 export default function ScrollJourneyCanvas() {
@@ -99,6 +172,7 @@ export default function ScrollJourneyCanvas() {
         {/* Fog in the page background color fades the grid into the distance */}
         <fog attach="fog" args={[bg.color, 10, 160]} />
         <GridFloor />
+        <GlowOrbs />
       </Canvas>
     </div>
   );
