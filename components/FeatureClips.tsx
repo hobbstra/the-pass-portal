@@ -427,12 +427,17 @@ export function RecipeClip() {
   );
 }
 
+// Ascending so the chart reads as a clear growth trend, revealed one bar at
+// a time rather than all at once.
+const FINANCE_BARS = [22, 34, 46, 58, 70, 82, 95];
+const FINANCE_BAR_STEP_MS = 380;
+
 export function FinanceClip() {
   const reduced = usePrefersReducedMotion();
   const [frameRef, inView] = useInView<HTMLDivElement>();
-  const bars = [30, 55, 40, 70, 50, 85, 65];
   const target = 4820;
   const [revenue, setRevenue] = useState(reduced ? target : 0);
+  const [barsShown, setBarsShown] = useState(reduced ? FINANCE_BARS.length : 0);
   const [hit, setHit] = useState(reduced);
   const [cycle, setCycle] = useState(0);
   const rafRef = useRef<number | null>(null);
@@ -440,30 +445,44 @@ export function FinanceClip() {
   useEffect(() => {
     if (reduced) {
       setRevenue(target);
+      setBarsShown(FINANCE_BARS.length);
       setHit(true);
       return;
     }
     if (!inView) return;
     let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const revealDuration = FINANCE_BARS.length * FINANCE_BAR_STEP_MS;
 
     const runCycle = () => {
       setHit(false);
+      setBarsShown(0);
+      for (let step = 1; step <= FINANCE_BARS.length; step++) {
+        timers.push(
+          setTimeout(() => {
+            if (!cancelled) setBarsShown(step);
+          }, step * FINANCE_BAR_STEP_MS)
+        );
+      }
+
       const start = performance.now();
-      const duration = 1400;
       const tick = (now: number) => {
         if (cancelled) return;
-        const p = Math.min(1, (now - start) / duration);
+        const p = Math.min(1, (now - start) / revealDuration);
         const eased = 1 - Math.pow(1 - p, 3);
         setRevenue(Math.round(eased * target));
         if (p < 1) {
           rafRef.current = requestAnimationFrame(tick);
         } else {
           setHit(true);
-          setTimeout(() => {
-            if (cancelled) return;
-            setRevenue(0);
-            setCycle((c) => c + 1);
-          }, 2600);
+          timers.push(
+            setTimeout(() => {
+              if (cancelled) return;
+              setRevenue(0);
+              setCycle((c) => c + 1);
+              runCycle();
+            }, 1400)
+          );
         }
       };
       rafRef.current = requestAnimationFrame(tick);
@@ -472,10 +491,10 @@ export function FinanceClip() {
     runCycle();
     return () => {
       cancelled = true;
+      timers.forEach(clearTimeout);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduced, inView, cycle]);
+  }, [reduced, inView]);
 
   return (
     <ClipFrame frameRef={frameRef}>
@@ -497,20 +516,25 @@ export function FinanceClip() {
         ${revenue.toLocaleString()}
       </div>
       <div className="flex items-end gap-1.5 h-10">
-        {bars.map((h, i) => (
-          <div key={`${cycle}-${i}`} className="flex-1 rounded-sm overflow-hidden flex items-end h-full">
-            <div
-              className={reduced ? "w-full rounded-sm" : "clip-bar-rise w-full rounded-sm"}
-              style={{
-                height: reduced ? `${h}%` : undefined,
-                backgroundImage: "var(--accent-gradient)",
-                opacity: 0.35 + (h / 100) * 0.5,
-                ["--clip-target-height" as string]: `${h}%`,
-                animationDelay: reduced ? undefined : `${300 + i * 90}ms`,
-              }}
-            />
-          </div>
-        ))}
+        {FINANCE_BARS.map((h, i) => {
+          const shown = reduced || i < barsShown;
+          return (
+            <div key={i} className="flex-1 rounded-sm overflow-hidden flex items-end h-full">
+              {shown && (
+                <div
+                  key={`${cycle}-${i}`}
+                  className={reduced ? "w-full rounded-sm" : "clip-bar-rise w-full rounded-sm"}
+                  style={{
+                    height: reduced ? `${h}%` : undefined,
+                    backgroundImage: "var(--accent-gradient)",
+                    opacity: 0.35 + (h / 100) * 0.5,
+                    ["--clip-target-height" as string]: `${h}%`,
+                  }}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     </ClipFrame>
   );
