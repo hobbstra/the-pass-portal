@@ -70,7 +70,7 @@ function GridFloor() {
 
   // GridHelper gives us the synthwave grid as real 3D line geometry — the 3D
   // equivalent of the old CSS repeating-linear-gradient floor. 600x600 world
-  // units with 150 divisions = 4-unit cells; scene fog fades it toward the
+  // units with 100 divisions = 6-unit cells; scene fog fades it toward the
   // horizon for depth.
   const grid = useMemo(() => {
     const helper = new THREE.GridHelper(600, 100, token.color, token.color);
@@ -95,10 +95,10 @@ function GridFloor() {
 
 const ORB_COUNT = 16;
 
-// One InstancedMesh (a single draw call) rather than 24 separate <mesh>
+// One InstancedMesh (a single draw call) rather than 16 separate <mesh>
 // elements: every orb shares the same sphere geometry and additive material
 // and varies only by transform + per-instance color — exactly the case
-// instancing exists for. At 24 objects individual meshes would also work,
+// instancing exists for. At 16 objects individual meshes would also work,
 // but instancing keeps the draw-call count flat if the orb count grows.
 function GlowOrbs() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
