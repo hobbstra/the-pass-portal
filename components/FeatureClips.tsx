@@ -2,9 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 
-function ClipFrame({ children }: { children: React.ReactNode }) {
+function ClipFrame({
+  children,
+  frameRef,
+}: {
+  children: React.ReactNode;
+  frameRef?: React.RefObject<HTMLDivElement | null>;
+}) {
   return (
     <div
+      ref={frameRef}
       className="relative rounded-lg border p-4 w-full max-w-[280px] overflow-hidden"
       style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
       aria-hidden="true"
@@ -12,6 +19,25 @@ function ClipFrame({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
+}
+
+// Each clip's loop is driven by its own mount-time useEffect, but the
+// component actually mounts as soon as the page loads (the pinned sections
+// just haven't scrolled into view yet) — so without this, users who scroll
+// down land mid-cycle or on the settled end-state instead of seeing a fresh
+// run start. This gates the loop on real viewport visibility so scrolling a
+// clip into view always restarts its cycle from the beginning.
+function useInView<T extends HTMLElement>(threshold = 0.35) {
+  const ref = useRef<T | null>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+  return [ref, inView] as const;
 }
 
 function usePrefersReducedMotion() {
@@ -42,6 +68,7 @@ const TOTAL_SHIFTS = SHIFT_SLOTS.filter(Boolean).length;
 
 export function ScheduleClip() {
   const reduced = usePrefersReducedMotion();
+  const [frameRef, inView] = useInView<HTMLDivElement>();
   const [filled, setFilled] = useState(0);
   const [cycle, setCycle] = useState(0);
 
@@ -50,6 +77,7 @@ export function ScheduleClip() {
       setFilled(TOTAL_SHIFTS);
       return;
     }
+    if (!inView) return;
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
@@ -79,12 +107,12 @@ export function ScheduleClip() {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [reduced]);
+  }, [reduced, inView]);
 
   const allFilled = filled >= TOTAL_SHIFTS;
 
   return (
-    <ClipFrame>
+    <ClipFrame frameRef={frameRef}>
       <div className="grid grid-cols-7 gap-1 mb-2">
         {SHIFT_DAYS.map((d, i) => (
           <span key={i} className="text-[10px] text-center font-sans-ui" style={{ color: "var(--ink-muted)" }}>
@@ -140,6 +168,7 @@ const RYE_STAGES = [
 
 export function InventoryClip() {
   const reduced = usePrefersReducedMotion();
+  const [frameRef, inView] = useInView<HTMLDivElement>();
   const [stage, setStage] = useState(reduced ? 2 : 0);
   const [cycle, setCycle] = useState(0);
 
@@ -148,6 +177,7 @@ export function InventoryClip() {
       setStage(2);
       return;
     }
+    if (!inView) return;
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
@@ -182,13 +212,13 @@ export function InventoryClip() {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [reduced]);
+  }, [reduced, inView]);
 
   const rye = RYE_STAGES[stage];
   const allAbovePar = stage === 2;
 
   return (
-    <ClipFrame>
+    <ClipFrame frameRef={frameRef}>
       <div className="space-y-3">
         <InventoryRow label="Flour" pct={INVENTORY_STATIC_ROWS[0].pct} animKey="static-0" />
         <InventoryRow
@@ -278,6 +308,7 @@ const CONFETTI_DOTS = [
 // together, instead of three independently-timed loops drifting apart.
 export function RecipeClip() {
   const reduced = usePrefersReducedMotion();
+  const [frameRef, inView] = useInView<HTMLDivElement>();
   const [secondsLeft, setSecondsLeft] = useState(reduced ? 0 : PROOF_TIMER_SECONDS);
   const [ringing, setRinging] = useState(reduced);
   const [cycle, setCycle] = useState(0);
@@ -288,6 +319,7 @@ export function RecipeClip() {
       setRinging(true);
       return;
     }
+    if (!inView) return;
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
@@ -322,7 +354,7 @@ export function RecipeClip() {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [reduced]);
+  }, [reduced, inView]);
 
   const baguetteStage = ringing ? 2 : secondsLeft >= 2 ? 0 : 1;
   const baguette = [
@@ -334,7 +366,7 @@ export function RecipeClip() {
   const seededRyeColor = ringing ? "var(--accent-cyan)" : "var(--accent-pink)";
 
   return (
-    <ClipFrame>
+    <ClipFrame frameRef={frameRef}>
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink)" }}>
@@ -397,12 +429,13 @@ export function RecipeClip() {
 
 export function FinanceClip() {
   const reduced = usePrefersReducedMotion();
+  const [frameRef, inView] = useInView<HTMLDivElement>();
   const bars = [30, 55, 40, 70, 50, 85, 65];
   const target = 4820;
   const [revenue, setRevenue] = useState(reduced ? target : 0);
   const [hit, setHit] = useState(reduced);
   const [cycle, setCycle] = useState(0);
-  const frameRef = useRef<number | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (reduced) {
@@ -410,6 +443,7 @@ export function FinanceClip() {
       setHit(true);
       return;
     }
+    if (!inView) return;
     let cancelled = false;
 
     const runCycle = () => {
@@ -422,7 +456,7 @@ export function FinanceClip() {
         const eased = 1 - Math.pow(1 - p, 3);
         setRevenue(Math.round(eased * target));
         if (p < 1) {
-          frameRef.current = requestAnimationFrame(tick);
+          rafRef.current = requestAnimationFrame(tick);
         } else {
           setHit(true);
           setTimeout(() => {
@@ -432,19 +466,19 @@ export function FinanceClip() {
           }, 2600);
         }
       };
-      frameRef.current = requestAnimationFrame(tick);
+      rafRef.current = requestAnimationFrame(tick);
     };
 
     runCycle();
     return () => {
       cancelled = true;
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduced, cycle]);
+  }, [reduced, inView, cycle]);
 
   return (
-    <ClipFrame>
+    <ClipFrame frameRef={frameRef}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink-muted)" }}>
           Weekly revenue
