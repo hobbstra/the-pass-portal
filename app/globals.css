@@ -74,8 +74,13 @@ body {
     }
   }
 
-  .clip-shift {
-    animation: clip-pulse 2.4s ease-in-out infinite;
+  @keyframes clip-pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    60% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .clip-pop {
+    animation: clip-pop 380ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
   .clip-bar-fill {
     animation: clip-grow 1.2s cubic-bezier(0.16, 1, 0.3, 1) both,
@@ -93,7 +98,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fade-up, .fade-in, .clip-shift, .clip-bar-fill, .clip-badge, .clip-bar-rise, .clip-confetti {
+  .fade-up, .fade-in, .clip-pop, .clip-bar-fill, .clip-badge, .clip-bar-rise, .clip-confetti {
     animation: none;
   }
 }

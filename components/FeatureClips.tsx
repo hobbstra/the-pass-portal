@@ -31,74 +31,234 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+const SHIFT_SLOTS = [1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0];
+const SHIFT_DAYS = ["M", "T", "W", "T", "F", "S", "S"];
+// Ordinal position of each on-slot within the fill sequence (-1 for off-slots).
+const SHIFT_ORDER: number[] = (() => {
+  let n = 0;
+  return SHIFT_SLOTS.map((on) => (on ? n++ : -1));
+})();
+const TOTAL_SHIFTS = SHIFT_SLOTS.filter(Boolean).length;
+
 export function ScheduleClip() {
-  const days = ["M", "T", "W", "T", "F", "S", "S"];
-  const shifts = [1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0];
+  const reduced = usePrefersReducedMotion();
+  const [filled, setFilled] = useState(0);
+  const [cycle, setCycle] = useState(0);
+
+  useEffect(() => {
+    if (reduced) {
+      setFilled(TOTAL_SHIFTS);
+      return;
+    }
+    let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const run = () => {
+      setFilled(0);
+      for (let step = 1; step <= TOTAL_SHIFTS; step++) {
+        timers.push(
+          setTimeout(() => {
+            if (!cancelled) setFilled(step);
+          }, step * 170)
+        );
+      }
+      timers.push(
+        setTimeout(() => {
+          if (cancelled) return;
+          setCycle((c) => c + 1);
+          run();
+        }, TOTAL_SHIFTS * 170 + 2200)
+      );
+    };
+    run();
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, [reduced]);
+
+  const allFilled = filled >= TOTAL_SHIFTS;
+
   return (
     <ClipFrame>
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {days.map((d, i) => (
+        {SHIFT_DAYS.map((d, i) => (
           <span key={i} className="text-[10px] text-center font-sans-ui" style={{ color: "var(--ink-muted)" }}>
             {d}
           </span>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
-        {shifts.map((on, i) => (
-          <div
-            key={i}
-            className={on ? "clip-shift h-6 rounded-sm" : "h-6 rounded-sm"}
-            style={{
-              background: on ? (i % 2 === 0 ? "var(--accent-pink)" : "var(--accent-cyan)") : "transparent",
-              opacity: on ? 0.5 : 0,
-              border: on ? "none" : `1px dashed var(--border)`,
-              ["--clip-base-opacity" as string]: 0.5,
-              animationDelay: on ? `${(i % 5) * 220}ms` : undefined,
-            }}
-          />
-        ))}
+        {SHIFT_SLOTS.map((on, i) => {
+          const revealed = on ? SHIFT_ORDER[i] < filled : false;
+          return (
+            <div
+              key={`${cycle}-${i}-${revealed ? 1 : 0}`}
+              className={revealed ? "clip-pop h-6 rounded-sm" : "h-6 rounded-sm"}
+              style={{
+                background: revealed ? (i % 2 === 0 ? "var(--accent-pink)" : "var(--accent-cyan)") : "transparent",
+                opacity: revealed ? 0.75 : 1,
+                border: revealed ? "none" : `1px dashed var(--border)`,
+              }}
+            />
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center justify-between text-[10px] font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+        <span>
+          {filled}/{TOTAL_SHIFTS} shifts filled
+        </span>
+        {allFilled && (
+          <span
+            key={cycle}
+            className="clip-badge text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+            style={{ color: "var(--accent-cyan)", background: "rgba(255,255,255,0.06)" }}
+          >
+            All filled
+          </span>
+        )}
       </div>
     </ClipFrame>
   );
 }
 
+const INVENTORY_STATIC_ROWS = [
+  { label: "Flour", pct: 82 },
+  { label: "Sea salt", pct: 91 },
+];
+
+// 0: low stock, 1: order placed, 2: restocked above par
+const RYE_STAGES = [
+  { pct: 34, badge: "Low stock", badgeColor: "var(--accent-pink)" },
+  { pct: 34, badge: "Order placed", badgeColor: "var(--accent-cyan)" },
+  { pct: 88, badge: null, badgeColor: "var(--accent-cyan)" },
+];
+
 export function InventoryClip() {
-  const rows = [
-    { label: "Flour", pct: 82 },
-    { label: "Rye flour", pct: 34 },
-    { label: "Sea salt", pct: 91 },
-  ];
+  const reduced = usePrefersReducedMotion();
+  const [stage, setStage] = useState(reduced ? 2 : 0);
+  const [cycle, setCycle] = useState(0);
+
+  useEffect(() => {
+    if (reduced) {
+      setStage(2);
+      return;
+    }
+    let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const run = () => {
+      setStage(0);
+      timers.push(
+        setTimeout(() => {
+          if (cancelled) return;
+          setStage(1);
+          timers.push(
+            setTimeout(() => {
+              if (cancelled) return;
+              setStage(2);
+              timers.push(
+                setTimeout(() => {
+                  if (cancelled) return;
+                  setCycle((c) => c + 1);
+                  run();
+                }, 2600)
+              );
+            }, 1600)
+          );
+        }, 1600)
+      );
+    };
+    run();
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, [reduced]);
+
+  const rye = RYE_STAGES[stage];
+  const allAbovePar = stage === 2;
+
   return (
     <ClipFrame>
       <div className="space-y-3">
-        {rows.map((r, i) => (
-          <div key={r.label}>
-            <div className="flex justify-between items-baseline gap-3 text-[11px] font-sans-ui mb-1" style={{ color: "var(--ink-muted)" }}>
-              <span className="flex-1 min-w-0 truncate">{r.label}</span>
-              <span className="shrink-0">{r.pct}%</span>
-            </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-              <div
-                className="clip-bar-fill h-full rounded-full"
-                style={{
-                  width: `${r.pct}%`,
-                  backgroundImage: "var(--accent-gradient)",
-                  ["--clip-target-width" as string]: `${r.pct}%`,
-                  animationDelay: `${i * 200}ms, ${1200 + i * 200}ms`,
-                }}
-              />
-            </div>
-          </div>
-        ))}
+        <InventoryRow label="Flour" pct={INVENTORY_STATIC_ROWS[0].pct} animKey="static-0" />
+        <InventoryRow
+          label="Rye flour"
+          pct={rye.pct}
+          animKey={`rye-${cycle}-${stage === 2 ? "restocked" : "low"}`}
+          badge={rye.badge}
+          badgeColor={rye.badgeColor}
+        />
+        <InventoryRow label="Sea salt" pct={INVENTORY_STATIC_ROWS[1].pct} animKey="static-1" />
+      </div>
+      <div className="mt-3 flex items-center justify-between text-[10px] font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+        <span>Par-level check</span>
+        {allAbovePar && (
+          <span
+            key={cycle}
+            className="clip-badge text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+            style={{ color: "var(--accent-cyan)", background: "rgba(255,255,255,0.06)" }}
+          >
+            All above par
+          </span>
+        )}
       </div>
     </ClipFrame>
   );
 }
 
-const RECIPE_ROWS = [
-  { name: "Country White", status: "In proof", color: "var(--accent-cyan)" },
-  { name: "Seeded Rye", status: "Behind", color: "var(--accent-pink)" },
-];
+function InventoryRow({
+  label,
+  pct,
+  animKey,
+  badge,
+  badgeColor,
+}: {
+  label: string;
+  pct: number;
+  animKey: string;
+  badge?: string | null;
+  badgeColor?: string;
+}) {
+  return (
+    <div>
+      <div className="flex justify-between items-baseline gap-3 text-[11px] font-sans-ui mb-1" style={{ color: "var(--ink-muted)" }}>
+        <span className="flex-1 min-w-0 truncate">{label}</span>
+        {badge ? (
+          <span className="shrink-0 font-bold uppercase tracking-wide text-[9px]" style={{ color: badgeColor }}>
+            {badge}
+          </span>
+        ) : (
+          <span className="shrink-0">{pct}%</span>
+        )}
+      </div>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+        <div
+          key={animKey}
+          className="clip-bar-fill h-full rounded-full"
+          style={{
+            width: `${pct}%`,
+            backgroundImage: "var(--accent-gradient)",
+            ["--clip-target-width" as string]: `${pct}%`,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+const RECIPE_ROWS = [{ name: "Seeded Rye", status: "Behind", color: "var(--accent-pink)" }];
+
+const PROOF_TIMER_SECONDS = 8;
+
+function formatTimer(seconds: number) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
 
 const BAGUETTE_STAGES: { status: string; color: string }[] = [
   { status: "Queued", color: "var(--ink-muted)" },
@@ -119,6 +279,8 @@ export function RecipeClip() {
   const reduced = usePrefersReducedMotion();
   const [stage, setStage] = useState(reduced ? 2 : 0);
   const [burst, setBurst] = useState(0);
+  const [secondsLeft, setSecondsLeft] = useState(reduced ? 0 : PROOF_TIMER_SECONDS);
+  const [ringing, setRinging] = useState(reduced);
 
   useEffect(() => {
     if (reduced) {
@@ -153,11 +315,61 @@ export function RecipeClip() {
     };
   }, [reduced]);
 
+  useEffect(() => {
+    if (reduced) {
+      setSecondsLeft(0);
+      setRinging(true);
+      return;
+    }
+    let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const cycle = () => {
+      setRinging(false);
+      setSecondsLeft(PROOF_TIMER_SECONDS);
+      const tick = (n: number) => {
+        timers.push(
+          setTimeout(() => {
+            if (cancelled) return;
+            setSecondsLeft(n);
+            if (n > 0) {
+              tick(n - 1);
+            } else {
+              setRinging(true);
+              timers.push(setTimeout(cycle, 2200));
+            }
+          }, 1000)
+        );
+      };
+      tick(PROOF_TIMER_SECONDS - 1);
+    };
+    cycle();
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, [reduced]);
+
   const baguette = BAGUETTE_STAGES[stage];
 
   return (
     <ClipFrame>
       <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink)" }}>
+            Country White
+          </span>
+          <span
+            className={ringing && !reduced ? "clip-badge text-[9px] font-sans-ui font-bold px-2 py-0.5 rounded-full uppercase tracking-wide tabular-nums" : "text-[9px] font-sans-ui font-bold px-2 py-0.5 rounded-full uppercase tracking-wide tabular-nums"}
+            style={{
+              color: ringing ? "var(--accent-pink)" : "var(--accent-cyan)",
+              background: "rgba(255,255,255,0.06)",
+            }}
+          >
+            {ringing ? "Proof done" : formatTimer(secondsLeft)}
+          </span>
+        </div>
         {RECIPE_ROWS.map((r, i) => (
           <div key={r.name} className="flex items-center justify-between">
             <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink)" }}>
