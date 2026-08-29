@@ -53,13 +53,16 @@ export function ScheduleClip() {
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
+    const FILL_STEP_MS = 200;
+    const HOLD_MS = 2400;
+
     const run = () => {
       setFilled(0);
       for (let step = 1; step <= TOTAL_SHIFTS; step++) {
         timers.push(
           setTimeout(() => {
             if (!cancelled) setFilled(step);
-          }, step * 170)
+          }, step * FILL_STEP_MS)
         );
       }
       timers.push(
@@ -67,7 +70,7 @@ export function ScheduleClip() {
           if (cancelled) return;
           setCycle((c) => c + 1);
           run();
-        }, TOTAL_SHIFTS * 170 + 2200)
+        }, TOTAL_SHIFTS * FILL_STEP_MS + HOLD_MS)
       );
     };
     run();
@@ -148,6 +151,9 @@ export function InventoryClip() {
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
+    const STAGE_MS = 1100;
+    const HOLD_MS = 2200;
+
     const run = () => {
       setStage(0);
       timers.push(
@@ -163,11 +169,11 @@ export function InventoryClip() {
                   if (cancelled) return;
                   setCycle((c) => c + 1);
                   run();
-                }, 2600)
+                }, HOLD_MS)
               );
-            }, 1600)
+            }, STAGE_MS)
           );
-        }, 1600)
+        }, STAGE_MS)
       );
     };
     run();
@@ -188,7 +194,7 @@ export function InventoryClip() {
         <InventoryRow
           label="Rye flour"
           pct={rye.pct}
-          animKey={`rye-${cycle}-${stage === 2 ? "restocked" : "low"}`}
+          animKey={`rye-${cycle}-${stage}`}
           badge={rye.badge}
           badgeColor={rye.badgeColor}
         />
@@ -250,21 +256,14 @@ function InventoryRow({
   );
 }
 
-const RECIPE_ROWS = [{ name: "Seeded Rye", status: "Behind", color: "var(--accent-pink)" }];
-
-const PROOF_TIMER_SECONDS = 8;
+const PROOF_TIMER_SECONDS = 3;
+const PROOF_HOLD_MS = 1400;
 
 function formatTimer(seconds: number) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${String(s).padStart(2, "0")}`;
 }
-
-const BAGUETTE_STAGES: { status: string; color: string }[] = [
-  { status: "Queued", color: "var(--ink-muted)" },
-  { status: "In proof", color: "var(--accent-cyan)" },
-  { status: "Done", color: "var(--accent-pink)" },
-];
 
 const CONFETTI_DOTS = [
   { x: -18, y: -14, rot: -30, color: "var(--accent-pink)" },
@@ -275,45 +274,13 @@ const CONFETTI_DOTS = [
   { x: 22, y: 6, rot: -15, color: "var(--accent-pink)" },
 ];
 
+// A single timer drives all three rows so they land their "done" beat
+// together, instead of three independently-timed loops drifting apart.
 export function RecipeClip() {
   const reduced = usePrefersReducedMotion();
-  const [stage, setStage] = useState(reduced ? 2 : 0);
-  const [burst, setBurst] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(reduced ? 0 : PROOF_TIMER_SECONDS);
   const [ringing, setRinging] = useState(reduced);
-
-  useEffect(() => {
-    if (reduced) {
-      setStage(2);
-      return;
-    }
-    let cancelled = false;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
-    const cycle = () => {
-      setStage(0);
-      timers.push(
-        setTimeout(() => {
-          if (cancelled) return;
-          setStage(1);
-          timers.push(
-            setTimeout(() => {
-              if (cancelled) return;
-              setStage(2);
-              setBurst((b) => b + 1);
-              timers.push(setTimeout(cycle, 3200));
-            }, 1700)
-          );
-        }, 1500)
-      );
-    };
-    cycle();
-
-    return () => {
-      cancelled = true;
-      timers.forEach(clearTimeout);
-    };
-  }, [reduced]);
+  const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
     if (reduced) {
@@ -324,7 +291,7 @@ export function RecipeClip() {
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    const cycle = () => {
+    const run = () => {
       setRinging(false);
       setSecondsLeft(PROOF_TIMER_SECONDS);
       const tick = (n: number) => {
@@ -336,14 +303,20 @@ export function RecipeClip() {
               tick(n - 1);
             } else {
               setRinging(true);
-              timers.push(setTimeout(cycle, 2200));
+              timers.push(
+                setTimeout(() => {
+                  if (cancelled) return;
+                  setCycle((c) => c + 1);
+                  run();
+                }, PROOF_HOLD_MS)
+              );
             }
           }, 1000)
         );
       };
       tick(PROOF_TIMER_SECONDS - 1);
     };
-    cycle();
+    run();
 
     return () => {
       cancelled = true;
@@ -351,7 +324,14 @@ export function RecipeClip() {
     };
   }, [reduced]);
 
-  const baguette = BAGUETTE_STAGES[stage];
+  const baguetteStage = ringing ? 2 : secondsLeft >= 2 ? 0 : 1;
+  const baguette = [
+    { status: "Queued", color: "var(--ink-muted)" },
+    { status: "In proof", color: "var(--accent-cyan)" },
+    { status: "Done", color: "var(--accent-pink)" },
+  ][baguetteStage];
+  const seededRyeStatus = ringing ? "On track" : "Behind";
+  const seededRyeColor = ringing ? "var(--accent-cyan)" : "var(--accent-pink)";
 
   return (
     <ClipFrame>
@@ -370,19 +350,18 @@ export function RecipeClip() {
             {ringing ? "Proof done" : formatTimer(secondsLeft)}
           </span>
         </div>
-        {RECIPE_ROWS.map((r, i) => (
-          <div key={r.name} className="flex items-center justify-between">
-            <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink)" }}>
-              {r.name}
-            </span>
-            <span
-              className="clip-badge text-[9px] font-sans-ui font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-              style={{ color: r.color, background: "rgba(255,255,255,0.06)", animationDelay: `${i * 260}ms` }}
-            >
-              {r.status}
-            </span>
-          </div>
-        ))}
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink)" }}>
+            Seeded Rye
+          </span>
+          <span
+            key={`${cycle}-${seededRyeStatus}`}
+            className="clip-badge text-[9px] font-sans-ui font-bold px-2 py-0.5 rounded-full uppercase tracking-wide transition-colors duration-500"
+            style={{ color: seededRyeColor, background: "rgba(255,255,255,0.06)" }}
+          >
+            {seededRyeStatus}
+          </span>
+        </div>
         <div className="relative flex items-center justify-between">
           <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink)" }}>
             Baguette
@@ -393,8 +372,8 @@ export function RecipeClip() {
           >
             {baguette.status}
           </span>
-          {stage === 2 && !reduced && (
-            <span key={burst} className="pointer-events-none absolute right-2 top-1/2">
+          {ringing && !reduced && (
+            <span key={cycle} className="pointer-events-none absolute right-2 top-1/2">
               {CONFETTI_DOTS.map((c, i) => (
                 <span
                   key={i}
@@ -421,17 +400,20 @@ export function FinanceClip() {
   const bars = [30, 55, 40, 70, 50, 85, 65];
   const target = 4820;
   const [revenue, setRevenue] = useState(reduced ? target : 0);
+  const [hit, setHit] = useState(reduced);
   const [cycle, setCycle] = useState(0);
   const frameRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (reduced) {
       setRevenue(target);
+      setHit(true);
       return;
     }
     let cancelled = false;
 
     const runCycle = () => {
+      setHit(false);
       const start = performance.now();
       const duration = 1400;
       const tick = (now: number) => {
@@ -442,6 +424,7 @@ export function FinanceClip() {
         if (p < 1) {
           frameRef.current = requestAnimationFrame(tick);
         } else {
+          setHit(true);
           setTimeout(() => {
             if (cancelled) return;
             setRevenue(0);
@@ -462,8 +445,19 @@ export function FinanceClip() {
 
   return (
     <ClipFrame>
-      <div className="text-[11px] font-sans-ui mb-1" style={{ color: "var(--ink-muted)" }}>
-        Weekly revenue
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[11px] font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+          Weekly revenue
+        </span>
+        {hit && (
+          <span
+            key={cycle}
+            className="clip-badge text-[9px] font-sans-ui font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+            style={{ color: "var(--accent-cyan)", background: "rgba(255,255,255,0.06)" }}
+          >
+            Target hit
+          </span>
+        )}
       </div>
       <div className="text-xl font-bold mb-3 tabular-nums" style={{ color: "var(--ink)" }}>
         ${revenue.toLocaleString()}
