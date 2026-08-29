@@ -26,7 +26,7 @@ export default function Home() {
               payroll, all in one place.
             </p>
             <a
-              href="mailto:support@thepass.cloud"
+              href="mailto:support@thepass.cloud?subject=Book%20a%20demo"
               className="cta-sweep fade-in inline-block font-sans-ui text-sm font-bold px-6 py-3 rounded-full"
               style={{
                 backgroundImage: "var(--accent-gradient)",
@@ -35,7 +35,7 @@ export default function Home() {
                 animationDelay: "160ms",
               }}
             >
-              Get in touch
+              Book a demo
             </a>
           </div>
         </PinSection>
