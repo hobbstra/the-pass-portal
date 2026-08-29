@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { RefObject } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import useScrollProgress from "./useScrollProgress";
 
 // --- Design tokens ---------------------------------------------------------
 // Read from the CSS custom properties in app/globals.css at mount, so the 3D
@@ -45,6 +47,21 @@ function readToken(name: string): Token {
     opacity: m[4] !== undefined ? parseFloat(m[4]) : 1,
   };
 }
+
+// --- Camera choreography ---------------------------------------------------
+// The 0-1 scroll range divided into five beats: the hero, then one per
+// FeatureRow in app/page.tsx page order. Each row gets a subtle alternating
+// camera bank (roll) and lateral drift as its scroll range becomes active.
+const BEATS = [
+  { start: 0.0, end: 0.18, bank: 0, xOffset: 0 }, // hero
+  { start: 0.18, end: 0.38, bank: 0.06, xOffset: 1.6 }, // Scheduling & timesheets
+  { start: 0.38, end: 0.58, bank: -0.06, xOffset: -1.6 }, // Inventory & ordering
+  { start: 0.58, end: 0.78, bank: 0.06, xOffset: 1.6 }, // Recipes & production
+  { start: 0.78, end: 1.0, bank: -0.06, xOffset: -1.6 }, // Wholesale & finances
+];
+
+const CAMERA_START = new THREE.Vector3(0, 2.5, 8);
+const DOLLY_DISTANCE = 190; // camera ends at z = 8 - 190 = -182
 
 // --- Scene pieces ----------------------------------------------------------
 
@@ -149,9 +166,66 @@ function GlowOrbs() {
   );
 }
 
+function CameraRig({
+  progressRef,
+  frozen,
+}: {
+  progressRef: RefObject<number>;
+  frozen: boolean;
+}) {
+  useFrame((state, delta) => {
+    // prefers-reduced-motion: treat progress as permanently 0 — the camera
+    // damps to (and stays at) its start position, but the scene still renders.
+    const progress = frozen ? 0 : progressRef.current;
+    const beat =
+      BEATS.find((b) => progress >= b.start && progress < b.end) ??
+      BEATS[BEATS.length - 1]; // progress === 1 falls past every `end` check
+    const targetZ = CAMERA_START.z - progress * DOLLY_DISTANCE;
+    const targetX = CAMERA_START.x + beat.xOffset;
+    const targetRoll = beat.bank;
+
+    // Frame-rate-independent exponential damping (THREE.MathUtils.damp), so
+    // the motion reads as smoothed flight rather than a snap, and behaves
+    // identically at 60Hz and 120Hz. The dolly uses a higher lambda than the
+    // bank/drift so forward motion tracks the scrollbar tightly while the
+    // per-row tilt eases in lazily.
+    const cam = state.camera;
+    cam.position.z = THREE.MathUtils.damp(cam.position.z, targetZ, 6, delta);
+    cam.position.x = THREE.MathUtils.damp(cam.position.x, targetX, 3, delta);
+    cam.position.y = THREE.MathUtils.damp(
+      cam.position.y,
+      CAMERA_START.y,
+      3,
+      delta
+    );
+    cam.rotation.z = THREE.MathUtils.damp(cam.rotation.z, targetRoll, 3, delta);
+  });
+  return null;
+}
+
+function usePrefersReducedMotion(): boolean {
+  // Lazy initializer (not an effect) reads the media query on first render —
+  // this component is only ever mounted client-side (ScrollJourneyLazy uses
+  // `ssr: false`), so `window` is always available here. Avoids the
+  // react-hooks/set-state-in-effect lint rule that flags calling setState
+  // synchronously inside a useEffect body.
+  const [reduced, setReduced] = useState(
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
+
 // --- Canvas ----------------------------------------------------------------
 
 export default function ScrollJourneyCanvas() {
+  const progressRef = useScrollProgress();
+  const reducedMotion = usePrefersReducedMotion();
   const bg = useMemo(() => readToken("--bg"), []);
 
   return (
@@ -173,6 +247,7 @@ export default function ScrollJourneyCanvas() {
         <fog attach="fog" args={[bg.color, 10, 160]} />
         <GridFloor />
         <GlowOrbs />
+        <CameraRig progressRef={progressRef} frozen={reducedMotion} />
       </Canvas>
     </div>
   );
