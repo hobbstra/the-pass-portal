@@ -15,7 +15,7 @@ export default function Home() {
               className="fade-up text-5xl font-bold leading-tight mb-6"
               style={{ color: "var(--ink)" }}
             >
-              Everything that converges before it goes out.
+              Run the pass, not the chaos.
             </h1>
             <p
               className="fade-up text-xl leading-relaxed mb-10"
