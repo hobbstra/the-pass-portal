@@ -73,7 +73,7 @@ function GridFloor() {
   // units with 150 divisions = 4-unit cells; scene fog fades it toward the
   // horizon for depth.
   const grid = useMemo(() => {
-    const helper = new THREE.GridHelper(600, 150, token.color, token.color);
+    const helper = new THREE.GridHelper(600, 100, token.color, token.color);
     const material = helper.material as THREE.LineBasicMaterial;
     material.transparent = true;
     material.opacity = token.opacity; // --grid-line's own low alpha (0.25)
@@ -93,7 +93,7 @@ function GridFloor() {
   return <primitive object={grid} position={[0, 0, -250]} />;
 }
 
-const ORB_COUNT = 24;
+const ORB_COUNT = 16;
 
 // One InstancedMesh (a single draw call) rather than 24 separate <mesh>
 // elements: every orb shares the same sphere geometry and additive material
@@ -239,7 +239,7 @@ export default function ScrollJourneyCanvas() {
       aria-hidden="true"
     >
       <Canvas
-        dpr={[1, 1.5]} // capped device-pixel-ratio — perf guard from the design spec
+        dpr={[1, 1]} // capped device-pixel-ratio — perf guard from the design spec
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         camera={{ position: [0, 2.5, 8], fov: 60, near: 0.1, far: 400 }}
       >
