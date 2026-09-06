@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="The Pass">
+  <!--
+    The Pass mark.
+
+    Replaces app/favicon.ico, which was byte-identical to the Swells admin
+    console's favicon — so the product's own site was showing a tenant's
+    logo in every browser tab (Erik, 2026-09-06: "the pass root shows
+    swells").
+
+    The pass is the counter where finished plates cross from kitchen to
+    service, so the mark is that: a service window with a plate crossing
+    it. Drawn as three solid shapes with no fine detail, because this is
+    read at 16px in a tab far more often than anywhere else — anything
+    thinner turns to mush at that size.
+
+    Colours come from the portal's own tokens (app/globals.css):
+    --bg #0d0716, --accent-pink #ff3cb4, --accent-cyan #5ad8ff.
+  -->
+  <defs>
+    <linearGradient id="pass-accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff3cb4"/>
+      <stop offset="1" stop-color="#5ad8ff"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="#0d0716"/>
+
+  <!-- The pass itself: the shelf plates are handed across. -->
+  <rect x="10" y="34" width="44" height="6" rx="3" fill="url(#pass-accent)"/>
+
+  <!-- A plate resting on it, crossing through. Offset right of centre so
+       the mark reads as movement across the pass rather than a static
+       symmetrical badge. -->
+  <circle cx="38" cy="24" r="9" fill="url(#pass-accent)" opacity="0.95"/>
+
+  <!-- Ticket rail above — the orders waiting to be called. Two short bars
+       rather than a row of thin lines, which would disappear at 16px. -->
+  <rect x="10" y="16" width="14" height="5" rx="2.5" fill="#f2e9ff" opacity="0.55"/>
+  <rect x="10" y="46" width="26" height="5" rx="2.5" fill="#f2e9ff" opacity="0.28"/>
+</svg>
