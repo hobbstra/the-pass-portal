@@ -5,7 +5,8 @@ export default function Eula() {
     <LegalPageShell title="End User License Agreement" lastUpdated="August 28, 2026">
       <p>
         This End User License Agreement ("EULA") governs your use of The
-        Pass's mobile and web applications (the "Software"). By installing
+        Pass's mobile and web applications (the "Software"), published by
+        E&amp;P Boulangerie LLC ("The Pass," "we," "us," "our"). By installing
         or using the Software, you agree to this EULA. This EULA works
         alongside our{" "}
         <a href="/terms" className="underline">Terms of Service</a>, which

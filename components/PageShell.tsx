@@ -19,7 +19,7 @@ export default function PageShell({ children }: { children: React.ReactNode }) {
           className="max-w-4xl mx-auto px-6 py-8 text-sm flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
           style={{ color: "var(--ink-muted)" }}
         >
-          <span>&copy; {new Date().getFullYear()} The Pass</span>
+          <span>&copy; {new Date().getFullYear()} E&amp;P Boulangerie LLC</span>
           <nav className="flex gap-6">
             <Link href="/privacy" className="hover:underline">Privacy</Link>
             <Link href="/terms" className="hover:underline">Terms</Link>

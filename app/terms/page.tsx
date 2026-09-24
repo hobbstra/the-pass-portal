@@ -5,7 +5,8 @@ export default function Terms() {
     <LegalPageShell title="Terms of Service" lastUpdated="August 28, 2026">
       <p>
         These Terms of Service ("Terms") govern access to and use of The
-        Pass's software platform (the "Service"). By using the Service, you
+        Pass's software platform (the "Service"), operated by E&amp;P
+        Boulangerie LLC ("The Pass," "we," "us," "our"). By using the Service, you
         agree to these Terms. If you're using the Service on behalf of a
         business ("Customer"), you're agreeing on that business's behalf,
         and "you" refers to that Customer and its authorized users.

@@ -4,7 +4,8 @@ export default function PrivacyPolicy() {
   return (
     <LegalPageShell title="Privacy Policy" lastUpdated="August 28, 2026">
       <p>
-        This Privacy Policy describes how The Pass ("we," "us," "our")
+        This Privacy Policy describes how E&amp;P Boulangerie LLC, operator of The Pass
+        ("The Pass," "we," "us," "our"),
         collects, uses, and shares information when a restaurant or bakery
         business ("Customer") and its employees use The Pass's software
         (the "Service").
