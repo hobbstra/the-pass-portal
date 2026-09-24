@@ -38,6 +38,7 @@ export const employers: Employer[] = [
         title: "Barista",
         employmentType: "Part-time",
         location: "San Diego, CA",
+        pay: "$18–$20/hr + shared tips",
         summary:
           "Pull shots and pour drinks alongside our bread, pastries, and bagels. Our customers are regulars, and we want them to feel like it.",
         duties: [
@@ -57,6 +58,7 @@ export const employers: Employer[] = [
         title: "Front of House",
         employmentType: "Part-time",
         location: "San Diego, CA",
+        pay: "$18–$21/hr + shared tips",
         summary:
           "You're the face of the bakery. Set up the stand or counter, talk bread with customers, and keep the line moving when the country loaves are going fast.",
         duties: [
@@ -77,6 +79,7 @@ export const employers: Employer[] = [
         title: "Viennoiserie Baker",
         employmentType: "Full-time",
         location: "San Diego, CA",
+        pay: "$22–$26/hr + shared tips",
         summary:
           "Laminate, shape, proof, and bake our croissants and other laminated pastries. Early mornings, a small team, and butter everywhere.",
         duties: [
