@@ -27,7 +27,7 @@ export const employers: Employer[] = [
     name: "Swells Sourdough",
     tagline:
       "A small sourdough bakery on the San Diego coast. We bake before sunrise and sell at the Little Italy Mercato and La Jolla Open Aire markets.",
-    applyEmail: "hello@swellsbakery.com",
+    applyEmail: "jobs@swellsbakery.com",
     postings: [
       {
         id: "barista",
