@@ -19,8 +19,9 @@ export default function PageShell({ children }: { children: React.ReactNode }) {
           className="max-w-4xl mx-auto px-6 py-8 text-sm flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
           style={{ color: "var(--ink-muted)" }}
         >
-          <span>&copy; {new Date().getFullYear()} E&amp;P Boulangerie LLC</span>
+          <span>&copy; {new Date().getFullYear()} The Pass, a product of E&amp;P Boulangerie LLC</span>
           <nav className="flex gap-6">
+            <Link href="/careers" className="hover:underline">Jobs</Link>
             <Link href="/privacy" className="hover:underline">Privacy</Link>
             <Link href="/terms" className="hover:underline">Terms</Link>
             <Link href="/eula" className="hover:underline">EULA</Link>
