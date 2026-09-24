@@ -68,6 +68,12 @@ export default async function EmployerJobs({ params }: { params: Promise<{ slug:
                 Send a few lines about yourself and your availability to{" "}
                 <span style={{ color: "var(--ink)" }}>{employer.applyEmail}</span>.
               </p>
+              <p className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+                Get to know {employer.name}:{" "}
+                <a href={employer.website} target="_blank" rel="noopener noreferrer" className="underline">Website</a>
+                {" · "}
+                <a href={employer.instagram} target="_blank" rel="noopener noreferrer" className="underline">Instagram</a>
+              </p>
             </section>
           ))}
         </div>

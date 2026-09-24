@@ -18,6 +18,8 @@ export type Employer = {
   name: string;
   tagline: string;
   applyEmail: string;
+  website: string;
+  instagram: string;
   postings: JobPosting[];
 };
 
@@ -28,6 +30,8 @@ export const employers: Employer[] = [
     tagline:
       "A small sourdough bakery on the San Diego coast. We bake before sunrise and sell at the Little Italy Mercato and La Jolla Open Aire markets.",
     applyEmail: "jobs@swellsbakery.com",
+    website: "https://swellssourdough.com",
+    instagram: "https://www.instagram.com/swellssourdough/",
     postings: [
       {
         id: "barista",
