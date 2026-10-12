@@ -2,7 +2,7 @@ import LegalPageShell from "@/components/LegalPageShell";
 
 export default function PrivacyPolicy() {
   return (
-    <LegalPageShell title="Privacy Policy" lastUpdated="August 28, 2026">
+    <LegalPageShell title="Privacy Policy" lastUpdated="October 12, 2026">
       <p>
         This Privacy Policy describes how E&amp;P Boulangerie LLC, operator of The Pass
         ("The Pass," "we," "us," "our"),
@@ -58,6 +58,19 @@ export default function PrivacyPolicy() {
           and reports for the Customer's owners/managers.
         </li>
         <li>
+          <strong>Bank and card account information (owners only):</strong>{" "}
+          if a Customer's owner chooses to connect a bank or card account,
+          we receive — through Plaid — the account's name, type, last four
+          digits, balances, and posted transactions (date, description,
+          amount). We never see or store bank usernames or passwords: the
+          owner signs in to their bank inside Plaid's secure screen and
+          chooses which accounts to share. Owners may instead upload a bank
+          or card statement, which is read automatically to extract the
+          same transaction details; the statement file itself is not kept.
+          This information is shown only to the Customer's owners, never
+          to managers or employees.
+        </li>
+        <li>
           <strong>Messages and photos:</strong> if the Customer uses The
           Pass's crew messaging feature, we store the text and any photos
           sent between team members using that feature.
@@ -76,8 +89,12 @@ export default function PrivacyPolicy() {
         We use the information above to operate the Service: authenticating
         you, showing you your schedule and tasks, enforcing on-premises-only
         access to certain content, powering the Customer's own dashboards
-        and reports, delivering messages and notifications, and providing
-        customer support. We do not sell any of this information.
+        and reports (for connected bank accounts: the business's cash on
+        hand, a cash-flow forecast, and where its money is spent),
+        delivering messages and notifications, and providing customer
+        support. We do not sell any of this information, and we do not use
+        bank data for advertising, marketing, or any purpose other than
+        showing the Customer its own finances.
       </p>
 
       <h2 className="text-xl font-semibold pt-4" style={{ color: "var(--ink)" }}>
@@ -87,6 +104,13 @@ export default function PrivacyPolicy() {
       <ul className="list-disc pl-6 space-y-2">
         <li><strong>Square</strong> — as the source of the Customer's sales and payroll data, which we mirror into the Service.</li>
         <li><strong>Intuit / QuickBooks</strong> — as the source of the Customer's financial reports, which we mirror into the Service with the Customer's authorization.</li>
+        <li>
+          <strong>Plaid</strong> — to connect a Customer's bank and card
+          accounts at the owner's request. Plaid's handling of that data is
+          described in the{" "}
+          <a href="https://plaid.com/legal/#end-user-privacy-policy" className="underline">Plaid End User Privacy Policy</a>.
+        </li>
+        <li><strong>Anthropic</strong> — to read uploaded bank or card statements and extract their transactions. Statements are processed only to return the transactions and are not used to train models.</li>
         <li><strong>Twilio / Bird</strong> — to deliver the SMS one-time codes used for employee sign-in.</li>
         <li><strong>Supabase</strong> — our database and backend infrastructure provider, which stores the data described above.</li>
         <li><strong>Vercel</strong> — our application hosting provider.</li>
@@ -111,13 +135,19 @@ export default function PrivacyPolicy() {
         to be retained for a minimum period regardless of a deletion
         request).
       </p>
+      <p>
+        An owner can disconnect a bank at any time from the app.
+        Disconnecting ends our access through Plaid and deletes that bank's
+        accounts, balances, and transactions from The Pass.
+      </p>
 
       <h2 className="text-xl font-semibold pt-4" style={{ color: "var(--ink)" }}>
         Security
       </h2>
       <p>
         We use industry-standard practices to protect information,
-        including encryption in transit, access controls that isolate each
+        including encryption in transit (TLS) and at rest (AES-256),
+        access controls that isolate each
         Customer's data from every other Customer's, and role-based
         permissions within a Customer's own account. No system is perfectly
         secure, and we cannot guarantee absolute security.
@@ -127,7 +157,8 @@ export default function PrivacyPolicy() {
         Your choices
       </h2>
       <p>
-        You can decline location permission (certain content simply won't
+        Bank connections are always optional and can be removed at any
+        time. You can decline location permission (certain content simply won't
         be available) and notification permission (you won't receive push
         notifications) at the device level at any time. To request access
         to, correction of, or deletion of your information, contact us at
