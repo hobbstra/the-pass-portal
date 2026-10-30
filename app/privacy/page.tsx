@@ -2,7 +2,7 @@ import LegalPageShell from "@/components/LegalPageShell";
 
 export default function PrivacyPolicy() {
   return (
-    <LegalPageShell title="Privacy Policy" lastUpdated="October 12, 2026">
+    <LegalPageShell title="Privacy Policy" lastUpdated="October 30, 2026">
       <p>
         This Privacy Policy describes how E&amp;P Boulangerie LLC, operator of The Pass
         ("The Pass," "we," "us," "our"),
@@ -111,7 +111,7 @@ export default function PrivacyPolicy() {
           <a href="https://plaid.com/legal/#end-user-privacy-policy" className="underline">Plaid End User Privacy Policy</a>.
         </li>
         <li><strong>Anthropic</strong> — to read uploaded bank or card statements and extract their transactions. Statements are processed only to return the transactions and are not used to train models.</li>
-        <li><strong>Twilio / Bird</strong> — to deliver the SMS one-time codes used for employee sign-in.</li>
+        <li><strong>Twilio / Bird</strong> — to deliver the SMS one-time codes used for employee sign-in, and text messages between employers and job applicants.</li>
         <li><strong>Supabase</strong> — our database and backend infrastructure provider, which stores the data described above.</li>
         <li><strong>Vercel</strong> — our application hosting provider.</li>
         <li><strong>Apple</strong> — for the iOS version of the Service, distributed through the App Store.</li>
@@ -120,6 +120,25 @@ export default function PrivacyPolicy() {
         We do not share your information with any other third party except
         as required by law, or with your (or the Customer's) explicit
         consent.
+      </p>
+
+      <h2 id="applicant-texts" className="text-xl font-semibold pt-4 scroll-mt-24" style={{ color: "var(--ink)" }}>
+        Text messages to job applicants
+      </h2>
+      <p>
+        When you apply for a job listed on The Pass and give your mobile
+        number, the employer you applied to may text you from its own number
+        about your application: scheduling a call, interview or working
+        trial, changing that time, or answering your questions. Message
+        frequency varies. Message and data rates may apply. Reply HELP for
+        help or STOP to stop all texts from that number; reply START to
+        resume. Carriers are not liable for delayed or undelivered messages.
+      </p>
+      <p>
+        We store these messages so the employer can see the conversation.
+        No mobile information will be shared with third parties or
+        affiliates for marketing or promotional purposes. Text messaging
+        opt-in data and consent will not be shared with any third parties.
       </p>
 
       <h2 className="text-xl font-semibold pt-4" style={{ color: "var(--ink)" }}>
