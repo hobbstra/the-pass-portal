@@ -22,6 +22,8 @@ export type Employer = {
   instagram: string;
   // The employer's own applicant texting number (10DLC is per business, so never shared).
   smsNumber?: string;
+  // Registered 10DLC brand, named as the sender on the SMS terms page.
+  legalName?: string;
   postings: JobPosting[];
 };
 
@@ -35,6 +37,7 @@ export const employers: Employer[] = [
     website: "https://swellssourdough.com",
     instagram: "https://www.instagram.com/swellssourdough/",
     smsNumber: "(858) 216-8955",
+    legalName: "E&P Boulangerie LLC",
     postings: [
       {
         id: "barista",
