@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import { employers, getEmployer } from "@/lib/jobs";
@@ -68,6 +69,15 @@ export default async function EmployerJobs({ params }: { params: Promise<{ slug:
                 Send a few lines about yourself and your availability to{" "}
                 <span style={{ color: "var(--ink)" }}>{employer.applyEmail}</span>.
               </p>
+              {employer.smsNumber && (
+                <p className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+                  Include your mobile number to hear back by text. By giving it, you agree to
+                  receive texts from {employer.name} at {employer.smsNumber} about your
+                  application. Message frequency varies. Msg &amp; data rates may apply. Reply
+                  HELP for help, STOP to opt out. See our{" "}
+                  <Link href="/privacy#applicant-texts" className="underline">Privacy Policy</Link>.
+                </p>
+              )}
               <p className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
                 Get to know {employer.name}:{" "}
                 <a href={employer.website} target="_blank" rel="noopener noreferrer" className="underline">Website</a>

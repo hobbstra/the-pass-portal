@@ -20,6 +20,8 @@ export type Employer = {
   applyEmail: string;
   website: string;
   instagram: string;
+  // The employer's own applicant texting number (10DLC is per business, so never shared).
+  smsNumber?: string;
   postings: JobPosting[];
 };
 
@@ -32,6 +34,7 @@ export const employers: Employer[] = [
     applyEmail: "jobs@swellsbakery.com",
     website: "https://swellssourdough.com",
     instagram: "https://www.instagram.com/swellssourdough/",
+    smsNumber: "(858) 216-8955",
     postings: [
       {
         id: "barista",
