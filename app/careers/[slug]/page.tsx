@@ -74,6 +74,8 @@ export default async function EmployerJobs({ params }: { params: Promise<{ slug:
                   {`Include your mobile number to hear back by text. By giving it, you agree to receive texts from ${employer.name} at ${employer.smsNumber} about your application. `}
                   Message frequency varies. Msg &amp; data rates may apply. Reply
                   HELP for help, STOP to opt out. See our{" "}
+                  <Link href={`/careers/${employer.slug}/sms-terms`} className="underline">Text Messaging Terms</Link>
+                  {" and "}
                   <Link href="/privacy#applicant-texts" className="underline">Privacy Policy</Link>.
                 </p>
               )}
