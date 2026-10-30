@@ -71,9 +71,8 @@ export default async function EmployerJobs({ params }: { params: Promise<{ slug:
               </p>
               {employer.smsNumber && (
                 <p className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
-                  Include your mobile number to hear back by text. By giving it, you agree to
-                  receive texts from {employer.name} at {employer.smsNumber} about your
-                  application. Message frequency varies. Msg &amp; data rates may apply. Reply
+                  {`Include your mobile number to hear back by text. By giving it, you agree to receive texts from ${employer.name} at ${employer.smsNumber} about your application. `}
+                  Message frequency varies. Msg &amp; data rates may apply. Reply
                   HELP for help, STOP to opt out. See our{" "}
                   <Link href="/privacy#applicant-texts" className="underline">Privacy Policy</Link>.
                 </p>
