@@ -15,7 +15,7 @@ export default async function ThanksPage({ params }: { params: Promise<{ slug: s
   const employer = getEmployer((await params).slug);
   if (!employer) notFound();
   return (
-    <PageShell>
+    <PageShell employer={employer}>
       <div className="max-w-3xl mx-auto px-6 py-12">
         <Thanks slug={employer.slug} />
       </div>

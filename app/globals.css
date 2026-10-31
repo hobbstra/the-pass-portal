@@ -119,7 +119,7 @@ select.ap-input {
   display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px; border-radius: 8px;
   border: 1px solid rgba(242, 233, 255, 0.28); font-size: 15px; color: var(--ink); cursor: pointer;
 }
-.ap-opt:has(:checked) { border-color: var(--brand-accent); background: rgba(242, 233, 255, 0.06); }
+.ap-opt:has(:checked) { border-color: var(--brand-fill); background: rgba(242, 233, 255, 0.06); }
 .ap-opt input, .ap-consent input {
   appearance: none; flex: none; width: 20px; height: 20px; margin: 0; border: 1.5px solid rgba(242, 233, 255, 0.55);
   background: var(--bg); cursor: pointer; border-radius: 5px;
@@ -155,3 +155,9 @@ select.ap-input {
 .ap-grid th[scope="row"] { width: 60px; }
 .ap-grid th[scope="row"] { width: 44px; }
 .ap-grid th[scope="col"] { font-size: 11px; letter-spacing: -0.01em; overflow: hidden; }
+
+/* round 3 grid: full width, bigger headers, empty cells on the card surface */
+.ap-grid { width: 100%; max-width: none; margin: 0; }
+.ap-grid th[scope="col"] { font-size: 13px; letter-spacing: 0; }
+.ap-cell span { background: var(--bg-elevated); border-color: var(--border); }
+.ap-cell input:checked + span { background: var(--brand-fill); border-color: transparent; }

@@ -112,7 +112,7 @@ export const getEmployer = (slug: string) => employers.find((e) => e.slug === sl
 export type ApplyQuestion = {
   id: string;
   prompt: string;
-  kind: "yes_no" | "yes_no_soon" | "shifts" | "days_times" | "date";
+  kind: "yes_no" | "yes_no_soon" | "shifts" | "days_times";
   options: { key: string; label: string }[];
 };
 

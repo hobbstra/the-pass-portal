@@ -84,11 +84,13 @@ export default async function EmployerJobs({
   const btn = "inline-flex items-center min-h-11 rounded-full px-5 py-2 font-sans-ui font-semibold text-sm";
 
   return (
-    <PageShell>
+    <PageShell employer={employer}>
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <p className="text-sm mb-2 font-sans-ui" style={{ color: brand.accent }}>
-          Now hiring
-        </p>
+        {!(reachable && open.length === 0) && (
+          <p className="text-sm mb-2 font-sans-ui" style={{ color: brand.accent }}>
+            Now hiring
+          </p>
+        )}
         <h1 className="text-3xl font-semibold mb-3" style={{ color: "var(--ink)" }}>
           Jobs at {employer.name}
         </h1>
@@ -104,6 +106,11 @@ export default async function EmployerJobs({
           ),
         )}
         {reachable && !closed && open.length === 0 && notice(<>We&apos;re not hiring right now. Check back soon.</>)}
+        {reachable && open.length === 0 && (
+          <a href={employer.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center min-h-11 rounded-full border px-5 py-2 font-sans-ui font-semibold text-sm" style={{ borderColor: "rgba(242, 233, 255, 0.4)", color: "var(--ink)" }}>
+            Visit {employer.name}&apos;s website
+          </a>
+        )}
 
         <div className="space-y-6">
           {reachable
@@ -131,8 +138,7 @@ export default async function EmployerJobs({
         </div>
 
         {open.length > 0 && (
-          // Registered notice stays (verbatim) until the campaign amendment is approved; it lives in the form's fine print.
-          <ApplyForm slug={employer.slug} jobs={open} selected={wanted ?? ""} notice={smsNotice} />
+          <ApplyForm slug={employer.slug} jobs={open} selected={wanted ?? ""} />
         )}
       </div>
     </PageShell>

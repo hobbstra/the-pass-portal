@@ -93,9 +93,6 @@ function Question({ q }: { q: ApplyQuestion }) {
     case "days_times":
       input = <DaysGrid name={name} options={q.options} />;
       break;
-    case "date":
-      input = <input type="date" name={name} className="ap-input font-sans-ui" />;
-      break;
   }
   return (
     <fieldset className="mt-7 first:mt-0 min-w-0">
@@ -134,8 +131,8 @@ function FinePrint({ text, slug }: { text: string; slug: string }) {
 }
 
 export default function ApplyForm({
-  slug, jobs, selected, notice,
-}: { slug: string; jobs: OpenJob[]; selected: string; notice?: React.ReactNode }) {
+  slug, jobs, selected,
+}: { slug: string; jobs: OpenJob[]; selected: string }) {
   const router = useRouter();
   const [token, setToken] = useState(selected);
   const [error, setError] = useState("");
@@ -214,7 +211,7 @@ export default function ApplyForm({
       try {
         sessionStorage.setItem(
           "applied",
-          JSON.stringify({ ...data, phone: body.get("phone"), org_name: job.org_name, sms_number: job.sms_number }),
+          JSON.stringify({ ...data, phone: body.get("phone"), org_name: job.org_name, sms_number: job.sms_number, brand_color: job.brand_color }),
         );
       } catch {}
       router.push(`/careers/${slug}/thanks`); // busy stays true: no double submit
@@ -227,7 +224,7 @@ export default function ApplyForm({
   }
 
   const days = qs(["days_times"]);
-  const avail = qs(["shifts", "date"]);
+  const avail = qs(["shifts"]);
   const about = qs(["yes_no", "yes_no_soon"]);
   return (
     <section id="apply" className="rounded-lg border p-5 sm:p-8 mt-10 scroll-mt-24" style={{ ...brandVars(job.brand_color), borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
@@ -296,6 +293,11 @@ export default function ApplyForm({
               <input type="checkbox" name="consent" value="1" className="mt-0.5" />
               <span>{job.consent_text}</span>
             </label>
+            {job.fine_print && (
+              <p className="mt-3 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+                <FinePrint text={job.fine_print} slug={slug} />
+              </p>
+            )}
           </div>
         )}
 
@@ -311,12 +313,6 @@ export default function ApplyForm({
           {busy ? "Sending…" : "Send application"}
         </button>
 
-        {(job.fine_print || notice) && (
-          <div className="mt-5 space-y-3 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }}>
-            {job.fine_print && <p><FinePrint text={job.fine_print} slug={slug} /></p>}
-            {notice}
-          </div>
-        )}
       </form>
       <p className="mt-8 text-xs text-center font-sans-ui" style={{ color: "var(--ink-muted)" }}>Powered by The Pass</p>
     </section>
