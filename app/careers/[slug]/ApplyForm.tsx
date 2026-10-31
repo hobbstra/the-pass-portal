@@ -33,47 +33,47 @@ function Options({ type, name, options }: { type: "checkbox" | "radio"; name: st
   );
 }
 
-// Days down the side, parts of the day across the top. Each option label reads "Tue afternoon".
+const GRID_DAYS = [["mon", "Mon"], ["tue", "Tue"], ["wed", "Wed"], ["thu", "Thu"], ["fri", "Fri"], ["sat", "Sat"], ["sun", "Sun"]];
+const GRID_PARTS = [["am", "Morning"], ["pm", "Afternoon"], ["eve", "Evening"]];
+
+// Days down the side, parts of the day across the top, from keys like "mon_am".
+// A key that does not fit the pattern is listed under the grid, never dropped.
 function DaysGrid({ name, options }: { name: string; options: Opt[] }) {
-  const days: string[] = [];
-  const parts: string[] = [];
-  const byCell = new Map<string, Opt>();
-  for (const o of options) {
-    const [day, ...rest] = o.label.split(/\s+/);
-    const part = rest.join(" ");
-    if (!days.includes(day)) days.push(day);
-    if (!parts.includes(part)) parts.push(part);
-    byCell.set(`${day}|${part}`, o);
-  }
+  const byKey = new Map(options.map((o) => [o.key, o]));
+  const fits = new Set(GRID_DAYS.flatMap(([d]) => GRID_PARTS.map(([p]) => `${d}_${p}`)));
+  const extra = options.filter((o) => !fits.has(o.key));
   return (
-    <table className="ap-grid font-sans-ui">
-      <thead>
-        <tr>
-          <td />
-          {parts.map((p) => <th key={p} scope="col">{p}</th>)}
-        </tr>
-      </thead>
-      <tbody>
-        {days.map((d) => (
-          <tr key={d}>
-            <th scope="row">{d}</th>
-            {parts.map((p) => {
-              const o = byCell.get(`${d}|${p}`);
-              return (
-                <td key={p}>
-                  {o && (
-                    <label className="ap-cell">
-                      <input type="checkbox" name={name} value={o.key} aria-label={o.label} />
-                      <span aria-hidden="true">&#10003;</span>
-                    </label>
-                  )}
-                </td>
-              );
-            })}
+    <>
+      <table className="ap-grid font-sans-ui">
+        <thead>
+          <tr>
+            <td />
+            {GRID_PARTS.map(([, label]) => <th key={label} scope="col">{label}</th>)}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {GRID_DAYS.map(([d, dayLabel]) => (
+            <tr key={d}>
+              <th scope="row">{dayLabel}</th>
+              {GRID_PARTS.map(([p, partLabel]) => {
+                const o = byKey.get(`${d}_${p}`);
+                return (
+                  <td key={p}>
+                    {o && (
+                      <label className="ap-cell">
+                        <input type="checkbox" name={name} value={o.key} aria-label={o.label || `${dayLabel} ${partLabel}`} />
+                        <span aria-hidden="true">&#10003;</span>
+                      </label>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {extra.length > 0 && <div className="mt-4"><Options type="checkbox" name={name} options={extra} /></div>}
+    </>
   );
 }
 
