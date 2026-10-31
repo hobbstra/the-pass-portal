@@ -17,7 +17,7 @@ export default async function ThanksPage({ params }: { params: Promise<{ slug: s
   return (
     <PageShell>
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <Thanks />
+        <Thanks slug={employer.slug} />
       </div>
     </PageShell>
   );

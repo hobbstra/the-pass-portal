@@ -113,6 +113,7 @@ export type ApplyQuestion = {
   id: string;
   prompt: string;
   kind: "yes_no" | "yes_no_soon" | "shifts" | "days_times" | "date";
+  options: { key: string; label: string }[];
 };
 
 export type OpenJob = {
@@ -123,6 +124,8 @@ export type OpenJob = {
   questions: ApplyQuestion[];
   consent_text: string | null;
   fine_print: string | null;
+  brand_color: string | null;
+  sms_number: string | null; // E.164
 };
 
 // Returns null when the RPC is unreachable or errors, so callers fall back to
@@ -143,7 +146,7 @@ export async function fetchOpenJobs(orgSlug: string): Promise<OpenJob[] | null> 
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const rows = (await res.json()) as OpenJob[];
-    return rows.map((r) => ({ ...r, questions: r.questions ?? [] }));
+    return rows.map((r) => ({ ...r, questions: (r.questions ?? []).map((q) => ({ ...q, options: q.options ?? [] })) }));
   } catch (e) {
     console.error("apply_jobs failed", e);
     return null;

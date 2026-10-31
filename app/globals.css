@@ -102,3 +102,56 @@ body {
     animation: none;
   }
 }
+
+/* ---- Apply form: native controls restyled for the dark page. Brand vars are set on the form. ---- */
+.ap-input {
+  width: 100%; min-height: 48px; border-radius: 8px; border: 1px solid rgba(242, 233, 255, 0.28);
+  background: var(--bg); color: var(--ink); padding: 10px 12px; font-size: 16px;
+}
+.ap-input:focus-visible, .ap-file:focus-within, .ap-cell input:focus-visible + span, .ap-opt:has(:focus-visible), .ap-submit:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 2px;
+}
+select.ap-input {
+  appearance: none; padding-right: 40px;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23f2e9ff' stroke-width='2'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 14px center;
+}
+.ap-opt {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px; border-radius: 8px;
+  border: 1px solid rgba(242, 233, 255, 0.28); font-size: 15px; color: var(--ink); cursor: pointer;
+}
+.ap-opt:has(:checked) { border-color: var(--brand-accent); background: rgba(242, 233, 255, 0.06); }
+.ap-opt input, .ap-consent input {
+  appearance: none; flex: none; width: 20px; height: 20px; margin: 0; border: 1.5px solid rgba(242, 233, 255, 0.55);
+  background: var(--bg); cursor: pointer; border-radius: 5px;
+}
+.ap-opt input[type="radio"] { border-radius: 50%; }
+.ap-opt input:checked, .ap-consent input:checked { border-color: transparent; box-shadow: var(--brand-ring); }
+.ap-opt input[type="checkbox"]:checked, .ap-consent input:checked {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='white' stroke-width='2.5'%3E%3Cpath d='M5 10.5l3.5 3.5L15 7'/%3E%3C/svg%3E") center / 100% no-repeat, var(--brand-fill);
+}
+.ap-opt input[type="radio"]:checked { background: radial-gradient(circle, var(--brand-ink) 0 34%, transparent 38%), var(--brand-fill); }
+.ap-file {
+  display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 64px; padding: 12px; text-align: center;
+  border: 1.5px dashed rgba(242, 233, 255, 0.45); border-radius: 8px; color: var(--ink); cursor: pointer; font-size: 15px;
+}
+.ap-file:hover { border-color: var(--brand-accent); }
+.ap-grid { border-collapse: separate; border-spacing: 4px; margin: -4px; }
+.ap-grid th { font-size: 12px; font-weight: 600; color: var(--ink-muted); padding: 0 0 2px; text-align: center; }
+.ap-grid th[scope="row"] { text-align: left; width: 44px; color: var(--ink); font-size: 14px; }
+.ap-cell { display: block; position: relative; cursor: pointer; }
+.ap-cell input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.ap-cell span {
+  display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 8px; font-weight: 700;
+  border: 1px solid rgba(242, 233, 255, 0.28); background: var(--bg); color: transparent;
+}
+.ap-cell input:checked + span { background: var(--brand-fill); color: var(--brand-ink); box-shadow: var(--brand-ring); border-color: transparent; }
+.ap-submit {
+  width: 100%; min-height: 52px; border-radius: 10px; font-size: 17px; font-weight: 600;
+  background: var(--brand-fill); color: var(--brand-ink); box-shadow: var(--brand-ring);
+}
+.ap-submit:disabled { opacity: 0.6; }
+.ap-grid { table-layout: fixed; width: 276px; max-width: 100%; }
+.ap-grid th[scope="col"] { text-transform: capitalize; }
+.ap-grid th[scope="row"] { width: 60px; }
+.ap-grid th[scope="row"] { width: 44px; }
+.ap-grid th[scope="col"] { font-size: 11px; letter-spacing: -0.01em; overflow: hidden; }
