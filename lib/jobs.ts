@@ -24,6 +24,8 @@ export type Employer = {
   smsNumber?: string;
   // Registered 10DLC brand, named as the sender on the SMS terms page.
   legalName?: string;
+  // Used only when apply_jobs has no open row to carry brand_color (nothing open, or unreachable).
+  brandColor?: string;
   postings: JobPosting[];
 };
 
@@ -38,6 +40,7 @@ export const employers: Employer[] = [
     instagram: "https://www.instagram.com/swellssourdough/",
     smsNumber: "(858) 216-8955",
     legalName: "E&P Boulangerie LLC",
+    brandColor: "#e85d4a",
     postings: [
       {
         id: "barista",

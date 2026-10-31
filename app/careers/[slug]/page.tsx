@@ -30,7 +30,7 @@ export default async function EmployerJobs({
   const fetched = await fetchOpenJobs(employer.slug);
   const open = fetched ?? [];
   const reachable = fetched !== null;
-  const brand = brandOf(open[0]?.brand_color);
+  const brand = brandOf(open[0]?.brand_color ?? employer.brandColor);
   const closed = !!wanted && !open.some((j) => j.token === wanted);
   const describe = (title: string) => employer.postings.find((p) => p.title.toLowerCase() === title.toLowerCase());
   const smsNotice = employer.smsNumber && (
@@ -44,8 +44,8 @@ export default async function EmployerJobs({
       <Link href="/privacy#applicant-texts" className="underline">Privacy Policy</Link>.
     </p>
   );
-  const notice = (children: React.ReactNode) => (
-    <p role="status" className="mb-6 rounded-lg border p-4 font-sans-ui" style={{ borderColor: "rgba(242, 233, 255, 0.22)", background: "rgba(242, 233, 255, 0.06)", color: "var(--ink)" }}>
+  const notice = (children: React.ReactNode, topBorder = false) => (
+    <p role="status" className="mb-6 rounded-lg border p-4 font-sans-ui" style={{ borderColor: "rgba(242, 233, 255, 0.22)", borderTop: topBorder ? `3px solid ${brand.fill}` : undefined, background: "rgba(242, 233, 255, 0.06)", color: "var(--ink)" }}>
       {children}
     </p>
   );
@@ -66,7 +66,8 @@ export default async function EmployerJobs({
             {accent && (
               <span className="inline-block rounded-full px-2.5 py-0.5 mr-2 text-xs font-semibold" style={{ background: brand.fill, color: brand.ink }}>{desc.employmentType}</span>
             )}
-            {[accent ? null : desc.employmentType, desc.location, desc.pay].filter(Boolean).join(" · ")}
+            {[accent ? null : desc.employmentType, desc.location].filter(Boolean).join(" · ")}
+            {desc.pay && <span className="block mt-1">{desc.pay}</span>}
           </p>
           <p className="leading-relaxed mb-4">{desc.summary}</p>
           <h3 className="font-semibold mb-2">What you&rsquo;ll do</h3>
@@ -108,10 +109,11 @@ export default async function EmployerJobs({
           ) : (
             <>That job isn&apos;t open any more. We&apos;re not hiring right now. Check back soon.</>
           ),
+          open.length === 0,
         )}
-        {reachable && !closed && open.length === 0 && notice(<>We&apos;re not hiring right now. Check back soon.</>)}
+        {reachable && !closed && open.length === 0 && notice(<>We&apos;re not hiring right now. Check back soon.</>, true)}
         {reachable && open.length === 0 && (
-          <a href={employer.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center min-h-11 rounded-full border px-5 py-2 font-sans-ui font-semibold text-sm" style={{ borderColor: "rgba(242, 233, 255, 0.4)", color: "var(--ink)" }}>
+          <a href={employer.website} target="_blank" rel="noopener noreferrer" className={btn} style={{ background: brand.fill, color: brand.ink }}>
             Visit {employer.name}&apos;s website
           </a>
         )}

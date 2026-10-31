@@ -30,7 +30,6 @@ export default function Thanks({ slug }: { slug: string }) {
   const org = a.org_name || "We";
   const b = brandOf(a.brand_color);
   const btn = "inline-flex items-center min-h-11 rounded-full border px-5 py-2 font-sans-ui font-semibold text-sm";
-  const btnStyle = { borderColor: "rgba(242, 233, 255, 0.4)", color: "var(--ink)" };
   const nowrap = { whiteSpace: "nowrap" } as const;
   return (
     <>
@@ -54,8 +53,8 @@ export default function Thanks({ slug }: { slug: string }) {
       )}
       <Link
         href={`/careers/${slug}`}
-        className={a.opted_out ? `${btn} mt-5` : "inline-block mt-6 underline font-sans-ui"}
-        style={a.opted_out ? btnStyle : { color: "var(--ink-muted)" }}
+        className="inline-block mt-6 underline font-sans-ui"
+        style={{ color: "var(--ink-muted)" }}
       >
         Back to jobs
       </Link>

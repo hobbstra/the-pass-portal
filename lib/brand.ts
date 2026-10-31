@@ -43,6 +43,7 @@ function shiftTo(hex: string, target: number) {
 // Fill for buttons, selected cells and radios. The ORIGINAL colour wins if white text, or
 // near-black text, reads on it (4.5:1) and the fill itself is >= 3:1 on the page. Only then is
 // lightness shifted. Works for any colour; nothing is special-cased.
+// Ruling (feedback 2026-09-21): orange/amber fill only when it IS the tenant's brand. Do not "fix" an amber tenant here.
 export function fillFor(hex: string) {
   const L = lumRgb(rgbOf(hex));
   if (contrast(L, PAGE) >= 3) {
