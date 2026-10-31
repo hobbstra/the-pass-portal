@@ -14,12 +14,18 @@ const field = "w-full rounded-md border px-3 py-2 font-sans-ui";
 const fieldStyle = { borderColor: "var(--border)", background: "var(--bg)", color: "var(--ink)" } as const;
 const labelCls = "block text-sm font-semibold mb-1 font-sans-ui";
 
+declare global {
+  interface Window { turnstile?: { reset: () => void } }
+}
+
+const MAX_RESUME = 5242880;
+
 function Checks({ name, options, labelOf }: { name: string; options: string[]; labelOf?: (o: string) => string }) {
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((o) => (
         <label key={o} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-sans-ui" style={{ borderColor: "var(--border)" }}>
-          <input type="checkbox" name={name} value={o} />
+          <input type="checkbox" name={name} value={o} aria-label={o} />
           {labelOf ? labelOf(o) : o}
         </label>
       ))}
@@ -95,11 +101,12 @@ function FinePrint({ text, slug }: { text: string; slug: string }) {
 }
 
 export default function ApplyForm({
-  slug, jobs, selected, notice,
-}: { slug: string; jobs: OpenJob[]; selected: string; notice?: string }) {
+  slug, jobs, selected,
+}: { slug: string; jobs: OpenJob[]; selected: string }) {
   const router = useRouter();
   const [token, setToken] = useState(selected);
   const [error, setError] = useState("");
+  const [expError, setExpError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [soon, setSoon] = useState(true);
   const job = jobs.find((j) => j.token === token) ?? jobs[0];
@@ -108,12 +115,22 @@ export default function ApplyForm({
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    setExpError(false);
     const f = new FormData(e.currentTarget);
     const experience = String(f.get("experience") ?? "").trim();
     const file = f.get("resume");
     const hasFile = file instanceof File && file.size > 0;
+    if (hasFile && file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setError("Please upload your résumé as a PDF.");
+      return;
+    }
+    if (hasFile && file.size > MAX_RESUME) {
+      setError("That file is over 5 MB.");
+      return;
+    }
     if (!hasFile && !experience) {
-      setError("Attach your résumé as a PDF or tell us about your experience.");
+      setExpError(true);
+      document.getElementById("experience")?.focus();
       return;
     }
     const answers: Record<string, unknown> = {};
@@ -147,16 +164,18 @@ export default function ApplyForm({
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(data.error || "Something went wrong sending your application. Please try again.");
+        window.turnstile?.reset();
+        setBusy(false);
         return;
       }
       try {
         sessionStorage.setItem("applied", JSON.stringify({ ...data, phone: body.get("phone") }));
       } catch {}
-      router.push(`/careers/${slug}/thanks`);
+      router.push(`/careers/${slug}/thanks`); // busy stays true: no double submit
     } catch (err) {
       console.error("apply-submit failed", err);
       setError("We couldn't reach the server. Check your connection and try again.");
-    } finally {
+      window.turnstile?.reset();
       setBusy(false);
     }
   }
@@ -164,7 +183,6 @@ export default function ApplyForm({
   return (
     <section id="apply" className="rounded-lg border p-6 mt-10 scroll-mt-24" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
       <h2 className="text-xl font-semibold mb-4" style={{ color: "var(--ink)" }}>Apply</h2>
-      {notice && <p role="status" className="mb-4 font-sans-ui" style={{ color: "var(--ink)" }}>{notice}</p>}
       <form onSubmit={onSubmit}>
         <div className="mb-5">
           <label htmlFor="job" className={labelCls}>Position</label>
@@ -174,7 +192,7 @@ export default function ApplyForm({
         </div>
         <div className="mb-5">
           <label htmlFor="name" className={labelCls}>Full name</label>
-          <input id="name" name="name" required autoComplete="name" className={field} style={fieldStyle} />
+          <input id="name" name="name" required maxLength={120} autoComplete="name" className={field} style={fieldStyle} />
         </div>
         <div className="mb-5">
           <label htmlFor="phone" className={labelCls}>Mobile phone</label>
@@ -182,9 +200,10 @@ export default function ApplyForm({
         </div>
         <div className="mb-5">
           <label htmlFor="resume" className={labelCls}>Résumé (PDF)</label>
-          <input id="resume" name="resume" type="file" accept="application/pdf" className="font-sans-ui text-sm" />
+          <input id="resume" name="resume" type="file" accept="application/pdf" aria-invalid={expError} aria-describedby={expError ? "exp-error" : undefined} className="font-sans-ui text-sm" />
           <label htmlFor="experience" className={`${labelCls} mt-3`}>Or tell us about your experience</label>
-          <textarea id="experience" name="experience" rows={5} className={field} style={fieldStyle} />
+          <textarea id="experience" name="experience" rows={5} maxLength={8000} aria-invalid={expError} aria-describedby={expError ? "exp-error" : undefined} className={field} style={fieldStyle} />
+          {expError && <p id="exp-error" role="alert" className="mt-1 text-sm font-sans-ui" style={{ color: "#ff6b6b" }}>Attach your résumé as a PDF or tell us about your experience.</p>}
         </div>
 
         {job.questions.map((q) => <Question key={`${job.token}-${q.id}`} q={q} />)}

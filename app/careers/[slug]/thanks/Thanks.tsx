@@ -1,20 +1,25 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 const noop = () => () => {};
+let cached = ""; // survives the removal below, so re-renders keep the text
 function read() {
   try {
-    return sessionStorage.getItem("applied") ?? "";
-  } catch {
-    return "";
-  }
+    cached = sessionStorage.getItem("applied") ?? cached;
+  } catch {}
+  return cached;
 }
 
 // The applicant's details come from sessionStorage (set by the form), so the
 // phone number never travels in a URL.
 export default function Thanks() {
   const raw = useSyncExternalStore(noop, read, () => "");
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem("applied");
+    } catch {}
+  }, []);
   let a: { first_name?: string; job_title?: string; texted?: boolean; phone?: string } = {};
   try {
     a = raw ? JSON.parse(raw) : {};

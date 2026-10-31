@@ -113,7 +113,6 @@ export type ApplyQuestion = {
   id: string;
   prompt: string;
   kind: "yes_no" | "yes_no_soon" | "shifts" | "days_times" | "date";
-  position: number;
 };
 
 export type OpenJob = {
@@ -144,7 +143,7 @@ export async function fetchOpenJobs(orgSlug: string): Promise<OpenJob[] | null> 
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const rows = (await res.json()) as OpenJob[];
-    return rows.map((r) => ({ ...r, questions: [...(r.questions ?? [])].sort((a, b) => a.position - b.position) }));
+    return rows.map((r) => ({ ...r, questions: r.questions ?? [] }));
   } catch (e) {
     console.error("apply_jobs failed", e);
     return null;

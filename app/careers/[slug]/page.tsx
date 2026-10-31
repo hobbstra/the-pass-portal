@@ -53,6 +53,12 @@ export default async function EmployerJobs({
           {employer.tagline}
         </p>
 
+        {closed && open.length > 0 && (
+          <p role="status" className="mb-6 rounded-lg border p-4 font-sans-ui" style={{ borderColor: "var(--border)", color: "var(--ink)" }}>
+            That job isn&apos;t open any more. <a href="#apply" className="underline">Pick one of the open jobs below.</a>
+          </p>
+        )}
+
         <div className="space-y-6">
           {employer.postings.map((job) => (
             <section
@@ -119,7 +125,6 @@ export default async function EmployerJobs({
               slug={employer.slug}
               jobs={open}
               selected={wanted ?? ""}
-              notice={closed ? "That job isn't open any more." : undefined}
             />
             {/* Registered notice stays until the campaign amendment is approved. */}
             {smsNotice}
