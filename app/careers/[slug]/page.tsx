@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageShell from "@/components/PageShell";
-import { employers, getEmployer } from "@/lib/jobs";
+import { employers, fetchOpenJobs, getEmployer } from "@/lib/jobs";
+import ApplyForm from "./ApplyForm";
 
 export const dynamicParams = false;
 
@@ -15,9 +16,29 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return employer ? { title: `Jobs at ${employer.name}`, description: employer.tagline } : {};
 }
 
-export default async function EmployerJobs({ params }: { params: Promise<{ slug: string }> }) {
+export default async function EmployerJobs({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ job?: string }>;
+}) {
   const employer = getEmployer((await params).slug);
   if (!employer) notFound();
+  const wanted = (await searchParams).job;
+  const open = (await fetchOpenJobs(employer.slug)) ?? [];
+  const jobFor = (title: string) => open.find((j) => j.title.toLowerCase() === title.toLowerCase());
+  const closed = !!wanted && !open.some((j) => j.token === wanted);
+  const smsNotice = employer.smsNumber && (
+    <p className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+      {`Include your mobile number to hear back by text. By giving it, you agree to receive texts from ${employer.name} at ${employer.smsNumber} about your application. `}
+      Message frequency varies. Msg &amp; data rates may apply. Reply
+      HELP for help, STOP to opt out. See our{" "}
+      <Link href={`/careers/${employer.slug}/sms-terms`} className="underline">Text Messaging Terms</Link>
+      {" and "}
+      <Link href="/privacy#applicant-texts" className="underline">Privacy Policy</Link>.
+    </p>
+  );
 
   return (
     <PageShell>
@@ -58,26 +79,29 @@ export default async function EmployerJobs({ params }: { params: Promise<{ slug:
                 {job.requirements.map((r) => <li key={r}>{r}</li>)}
               </ul>
 
-              <a
-                href={`mailto:${employer.applyEmail}?subject=${encodeURIComponent(`Application: ${job.title}`)}`}
-                className="inline-block rounded-full px-5 py-2 font-sans-ui font-semibold text-sm"
-                style={{ background: "var(--accent-gradient)", color: "var(--bg)" }}
-              >
-                Apply by email
-              </a>
-              <p className="text-sm mt-3 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
-                Send a few lines about yourself and your availability to{" "}
-                <span style={{ color: "var(--ink)" }}>{employer.applyEmail}</span>.
-              </p>
-              {employer.smsNumber && (
-                <p className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
-                  {`Include your mobile number to hear back by text. By giving it, you agree to receive texts from ${employer.name} at ${employer.smsNumber} about your application. `}
-                  Message frequency varies. Msg &amp; data rates may apply. Reply
-                  HELP for help, STOP to opt out. See our{" "}
-                  <Link href={`/careers/${employer.slug}/sms-terms`} className="underline">Text Messaging Terms</Link>
-                  {" and "}
-                  <Link href="/privacy#applicant-texts" className="underline">Privacy Policy</Link>.
-                </p>
+              {jobFor(job.title) ? (
+                <a
+                  href={`?job=${jobFor(job.title)!.token}#apply`}
+                  className="inline-block rounded-full px-5 py-2 font-sans-ui font-semibold text-sm"
+                  style={{ background: "var(--accent-gradient)", color: "var(--bg)" }}
+                >
+                  Apply
+                </a>
+              ) : (
+                <>
+                  <a
+                    href={`mailto:${employer.applyEmail}?subject=${encodeURIComponent(`Application: ${job.title}`)}`}
+                    className="inline-block rounded-full px-5 py-2 font-sans-ui font-semibold text-sm"
+                    style={{ background: "var(--accent-gradient)", color: "var(--bg)" }}
+                  >
+                    Apply by email
+                  </a>
+                  <p className="text-sm mt-3 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
+                    Send a few lines about yourself and your availability to{" "}
+                    <span style={{ color: "var(--ink)" }}>{employer.applyEmail}</span>.
+                  </p>
+                  {smsNotice}
+                </>
               )}
               <p className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
                 Get to know {employer.name}:{" "}
@@ -88,6 +112,19 @@ export default async function EmployerJobs({ params }: { params: Promise<{ slug:
             </section>
           ))}
         </div>
+
+        {open.length > 0 && (
+          <>
+            <ApplyForm
+              slug={employer.slug}
+              jobs={open}
+              selected={wanted ?? ""}
+              notice={closed ? "That job isn't open any more." : undefined}
+            />
+            {/* Registered notice stays until the campaign amendment is approved. */}
+            {smsNotice}
+          </>
+        )}
       </div>
     </PageShell>
   );

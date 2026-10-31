@@ -106,3 +106,47 @@ export const employers: Employer[] = [
 ];
 
 export const getEmployer = (slug: string) => employers.find((e) => e.slug === slug);
+
+// ---- Open jobs from the app's apply_jobs RPC (public, anon key) ----
+
+export type ApplyQuestion = {
+  id: string;
+  prompt: string;
+  kind: "yes_no" | "yes_no_soon" | "shifts" | "days_times" | "date";
+  position: number;
+};
+
+export type OpenJob = {
+  org_name: string;
+  job_id: string;
+  title: string;
+  token: string;
+  questions: ApplyQuestion[];
+  consent_text: string | null;
+  fine_print: string | null;
+};
+
+// Returns null when the RPC is unreachable or errors, so callers fall back to
+// "Apply by email" rather than rendering a broken form.
+export async function fetchOpenJobs(orgSlug: string): Promise<OpenJob[] | null> {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!base || !key) {
+    console.error("apply_jobs: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY not set");
+    return null;
+  }
+  try {
+    const res = await fetch(`${base}/rest/v1/rpc/apply_jobs`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_slug: orgSlug }),
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows = (await res.json()) as OpenJob[];
+    return rows.map((r) => ({ ...r, questions: [...(r.questions ?? [])].sort((a, b) => a.position - b.position) }));
+  } catch (e) {
+    console.error("apply_jobs failed", e);
+    return null;
+  }
+}
