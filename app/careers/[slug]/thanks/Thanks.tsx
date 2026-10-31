@@ -37,22 +37,26 @@ export default function Thanks({ slug }: { slug: string }) {
       <div className="flex items-center justify-center w-14 h-14 rounded-full mb-5" style={{ background: b.fill, color: b.ink }} aria-hidden="true">
         <svg width="28" height="28" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 10.5l3.5 3.5L15 7" /></svg>
       </div>
-      <h1 className="text-3xl font-semibold mb-3" style={{ color: "var(--ink)" }}>
-        {a.first_name && a.job_title ? `Thanks, ${a.first_name}. We've got your application for ${a.job_title}.` : "Thanks. We've got your application."}
+      <h1 className="text-3xl font-medium mb-3" style={{ color: "var(--ink)" }}>
+        {a.first_name && a.job_title ? <>Thanks, {a.first_name}. We&apos;ve got your application for <span className="font-bold">{a.job_title}</span>.</> : "Thanks. We've got your application."}
       </h1>
       <p className="leading-relaxed" style={{ color: "var(--ink-muted)" }}>
-        {a.texted && a.phone ? <>{org} will text you at <span style={nowrap}>{formatPhone(a.phone)}</span> if we&apos;d like to talk.</> : "We'll be in touch."}
+        {a.texted && a.phone ? <>{org} will text you at <span style={nowrap}>{formatPhone(a.phone)}</span> if we&apos;d like to talk.</> : a.opted_out ? "Want updates by text?" : "We'll be in touch."}
       </p>
       {a.opted_out && (
         a.sms_number ? (
-          <a href={`sms:${a.sms_number}?&body=START`} className={`${btn} mt-5 mr-3`} style={btnStyle}>
+          <a href={`sms:${a.sms_number}?&body=START`} className={`${btn} mt-4 mr-3 border-transparent`} style={{ background: b.fill, color: b.ink }}>
             <span style={nowrap}>Text START to {formatPhone(a.sms_number)}</span>
           </a>
         ) : (
           <p className="leading-relaxed mt-3" style={{ color: "var(--ink)" }}>Text START to our number to get texts.</p>
         )
       )}
-      <Link href={`/careers/${slug}`} className={`${btn} mt-5`} style={btnStyle}>
+      <Link
+        href={`/careers/${slug}`}
+        className={a.opted_out ? `${btn} mt-5` : "inline-block mt-6 underline font-sans-ui"}
+        style={a.opted_out ? btnStyle : { color: "var(--ink-muted)" }}
+      >
         Back to jobs
       </Link>
     </>

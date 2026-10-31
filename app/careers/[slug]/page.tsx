@@ -63,7 +63,10 @@ export default async function EmployerJobs({
       {desc ? (
         <>
           <p className="text-sm mt-1 mb-4 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
-            {[desc.employmentType, desc.location, desc.pay].filter(Boolean).join(" · ")}
+            {accent && (
+              <span className="inline-block rounded-full px-2.5 py-0.5 mr-2 text-xs font-semibold" style={{ background: brand.fill, color: brand.ink }}>{desc.employmentType}</span>
+            )}
+            {[accent ? null : desc.employmentType, desc.location, desc.pay].filter(Boolean).join(" · ")}
           </p>
           <p className="leading-relaxed mb-4">{desc.summary}</p>
           <h3 className="font-semibold mb-2">What you&rsquo;ll do</h3>
