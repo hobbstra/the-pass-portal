@@ -34,7 +34,7 @@ function Options({ type, name, options }: { type: "checkbox" | "radio"; name: st
 }
 
 const GRID_DAYS = [["mon", "Mon"], ["tue", "Tue"], ["wed", "Wed"], ["thu", "Thu"], ["fri", "Fri"], ["sat", "Sat"], ["sun", "Sun"]];
-const GRID_PARTS = [["am", "Morning"], ["pm", "Afternoon"], ["eve", "Evening"]];
+const GRID_PARTS = [["am", "Morning", "Morn"], ["pm", "Afternoon", "Aft"], ["eve", "Evening", "Eve"]];
 
 // Days down the side, parts of the day across the top, from keys like "mon_am".
 // A key that does not fit the pattern is listed under the grid, never dropped.
@@ -48,7 +48,7 @@ function DaysGrid({ name, options }: { name: string; options: Opt[] }) {
         <thead>
           <tr>
             <td />
-            {GRID_PARTS.map(([, label]) => <th key={label} scope="col">{label}</th>)}
+            {GRID_PARTS.map(([, label, short]) => <th key={label} scope="col"><span className="hd-full">{label}</span><span className="hd-short">{short}</span></th>)}
           </tr>
         </thead>
         <tbody>
@@ -114,7 +114,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function FinePrint({ text, slug }: { text: string; slug: string }) {
-  const parts = text.split(/(Text Messaging Terms|Privacy Policy)/);
+  const parts = text.split(/(Text Messaging Terms|Privacy Policy|\(\d{3}\) \d{3}-\d{4})/);
   return (
     <>
       {parts.map((p, i) =>
@@ -122,6 +122,8 @@ function FinePrint({ text, slug }: { text: string; slug: string }) {
           <Link key={i} href={`/careers/${slug}/sms-terms`} className="underline">{p}</Link>
         ) : p === "Privacy Policy" ? (
           <Link key={i} href="/privacy#applicant-texts" className="underline">{p}</Link>
+        ) : /^\(\d{3}\) /.test(p) ? (
+          <span key={i} style={{ whiteSpace: "nowrap" }}>{p}</span>
         ) : (
           p
         ),

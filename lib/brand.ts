@@ -21,31 +21,54 @@ function fromHsl(h: number, s: number, l: number) {
   return [0, 8, 4].map((n) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)));
 }
 
-export function tint(hex: string) {
-  const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-  const L = lumRgb(rgb);
-  if (L >= MIN && L <= MAX) return hex;
+const INK_DARK = "#1A0F0F";
+const rgbOf = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+const hexOf = (c: number[]) => "#" + c.map((v) => Math.round(v * 255).toString(16).padStart(2, "0")).join("");
+const contrast = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+const LUM_WHITE = 1, LUM_DARK = lumRgb(rgbOf(INK_DARK));
+
+// Move HSL lightness (hue and saturation kept) until luminance hits `target`.
+function shiftTo(hex: string, target: number) {
+  const rgb = rgbOf(hex);
   const [h, s, l0] = toHsl(rgb);
-  const target = (MIN + MAX) / 2;
-  let lo = L > MAX ? 0 : l0, hi = L > MAX ? l0 : 1; // luminance rises with HSL lightness
+  const up = lumRgb(rgb) < target; // luminance rises with HSL lightness
+  let lo = up ? l0 : 0, hi = up ? 1 : l0;
   for (let i = 0; i < 30; i++) {
     const mid = (lo + hi) / 2;
     if (lumRgb(fromHsl(h, s, mid)) > target) hi = mid; else lo = mid;
   }
-  return "#" + fromHsl(h, s, (lo + hi) / 2).map((v) => Math.round(v * 255).toString(16).padStart(2, "0")).join("");
+  return hexOf(fromHsl(h, s, (lo + hi) / 2));
 }
 
-const LAVENDER = "#cdbff0"; // neutral eyebrow colour, so the brand tint is the only accent
+// Fill for buttons, selected cells and radios. The ORIGINAL colour wins if white text, or
+// near-black text, reads on it (4.5:1) and the fill itself is >= 3:1 on the page. Only then is
+// lightness shifted. Works for any colour; nothing is special-cased.
+export function fillFor(hex: string) {
+  const L = lumRgb(rgbOf(hex));
+  if (contrast(L, PAGE) >= 3) {
+    if (contrast(L, LUM_WHITE) >= 4.5) return { fill: hex, ink: "#fff" };
+    if (contrast(L, LUM_DARK) >= 4.5) return { fill: hex, ink: INK_DARK };
+  }
+  return { fill: shiftTo(hex, (MIN + MAX) / 2), ink: "#fff" };
+}
+
+// For tinted TEXT on the page (>= 4.5:1). Never reuse the fill for text.
+export function textTint(hex: string) {
+  const L = lumRgb(rgbOf(hex));
+  return contrast(L, PAGE) >= 4.5 ? hex : shiftTo(hex, 4.5 * (PAGE + 0.05) - 0.05 + 0.01);
+}
+
+const LAVENDER = "#cdbff0"; // neutral eyebrow colour, so the brand fill is the only accent
+const check = (stroke: string) => `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='${encodeURIComponent(stroke)}' stroke-width='2.5'%3E%3Cpath d='M5 10.5l3.5 3.5L15 7'/%3E%3C/svg%3E")`;
 
 export function brandOf(hex: string | null | undefined) {
   if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) {
-    return { fill: "var(--accent-gradient)", ink: "var(--bg)", ring: "none", accent: LAVENDER, tint: "var(--accent-cyan)" };
+    return { fill: "var(--accent-gradient)", ink: "var(--bg)", ring: "none", accent: LAVENDER, text: "var(--accent-cyan)" };
   }
-  const fill = tint(hex);
-  return { fill, ink: "#fff", ring: "none", accent: LAVENDER, tint: fill };
+  return { ...fillFor(hex), ring: "none", accent: LAVENDER, text: textTint(hex) };
 }
 
 export const brandVars = (hex: string | null | undefined) => {
   const b = brandOf(hex);
-  return { "--brand-fill": b.fill, "--brand-ink": b.ink, "--brand-ring": b.ring, "--brand-accent": b.accent } as React.CSSProperties;
+  return { "--brand-fill": b.fill, "--brand-ink": b.ink, "--brand-ring": b.ring, "--brand-accent": b.accent, "--brand-check": check(b.ink === "var(--bg)" ? "#0d0716" : b.ink) } as React.CSSProperties;
 };

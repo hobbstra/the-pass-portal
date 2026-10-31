@@ -35,7 +35,8 @@ export default async function EmployerJobs({
   const describe = (title: string) => employer.postings.find((p) => p.title.toLowerCase() === title.toLowerCase());
   const smsNotice = employer.smsNumber && (
     <p>
-      {`Include your mobile number to hear back by text. By giving it, you agree to receive texts from ${employer.name} at ${employer.smsNumber} about your application. `}
+      {`Include your mobile number to hear back by text. By giving it, you agree to receive texts from ${employer.name} at `}
+      <span style={{ whiteSpace: "nowrap" }}>{employer.smsNumber}</span>{" about your application. "}
       Message frequency varies. Msg &amp; data rates may apply. Reply
       HELP for help, STOP to opt out. See our{" "}
       <Link href={`/careers/${employer.slug}/sms-terms`} className="underline">Text Messaging Terms</Link>
@@ -44,7 +45,7 @@ export default async function EmployerJobs({
     </p>
   );
   const notice = (children: React.ReactNode) => (
-    <p role="status" className="mb-6 rounded-lg border p-4 font-sans-ui" style={{ borderColor: "rgba(90, 216, 255, 0.4)", background: "rgba(90, 216, 255, 0.1)", color: "var(--ink)" }}>
+    <p role="status" className="mb-6 rounded-lg border p-4 font-sans-ui" style={{ borderColor: "rgba(242, 233, 255, 0.22)", background: "rgba(242, 233, 255, 0.06)", color: "var(--ink)" }}>
       {children}
     </p>
   );
@@ -56,8 +57,8 @@ export default async function EmployerJobs({
       <a href={employer.instagram} target="_blank" rel="noopener noreferrer" className="underline">Instagram</a>
     </p>
   );
-  const card = (key: string, id: string, title: string, desc: JobPosting | undefined, cta: React.ReactNode) => (
-    <section key={key} id={id} className="rounded-lg border p-6 scroll-mt-24" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
+  const card = (key: string, id: string, title: string, desc: JobPosting | undefined, cta: React.ReactNode, accent?: string) => (
+    <section key={key} id={id} className="rounded-lg border p-6 scroll-mt-24" style={{ borderColor: "var(--border)", borderTop: accent ? `3px solid ${accent}` : undefined, background: "var(--bg-elevated)" }}>
       <h2 className="text-xl font-semibold" style={{ color: "var(--ink)" }}>{title}</h2>
       {desc ? (
         <>
@@ -118,8 +119,9 @@ export default async function EmployerJobs({
                 card(j.token, j.job_id, j.title, describe(j.title),
                   <a href={`?job=${j.token}#apply`} className={btn} style={{ background: brand.fill, color: brand.ink, boxShadow: brand.ring }}>
                     Apply
-                  </a>))
-            : employer.postings.map((job) =>
+                  </a>, brand.fill))
+            : // Email fallback keeps the registered notice on purpose: the phone is optional there.
+              employer.postings.map((job) =>
                 card(job.id, job.id, job.title, job,
                   <>
                     <a

@@ -29,15 +29,14 @@ export default function Thanks({ slug }: { slug: string }) {
   } catch {}
   const org = a.org_name || "We";
   const b = brandOf(a.brand_color);
+  const btn = "inline-flex items-center min-h-11 rounded-full border px-5 py-2 font-sans-ui font-semibold text-sm";
+  const btnStyle = { borderColor: "rgba(242, 233, 255, 0.4)", color: "var(--ink)" };
   const nowrap = { whiteSpace: "nowrap" } as const;
   return (
     <>
       <div className="flex items-center justify-center w-14 h-14 rounded-full mb-5" style={{ background: b.fill, color: b.ink }} aria-hidden="true">
         <svg width="28" height="28" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 10.5l3.5 3.5L15 7" /></svg>
       </div>
-      {a.org_name && (
-        <p className="text-sm font-semibold uppercase tracking-wider mb-2 font-sans-ui" style={{ color: b.tint }}>{a.org_name}</p>
-      )}
       <h1 className="text-3xl font-semibold mb-3" style={{ color: "var(--ink)" }}>
         {a.first_name && a.job_title ? `Thanks, ${a.first_name}. We've got your application for ${a.job_title}.` : "Thanks. We've got your application."}
       </h1>
@@ -45,15 +44,15 @@ export default function Thanks({ slug }: { slug: string }) {
         {a.texted && a.phone ? <>{org} will text you at <span style={nowrap}>{formatPhone(a.phone)}</span> if we&apos;d like to talk.</> : "We'll be in touch."}
       </p>
       {a.opted_out && (
-        <p className="leading-relaxed mt-3" style={{ color: "var(--ink)" }}>
-          {a.sms_number ? (
-            <>Text <a href={`sms:${a.sms_number}?&body=START`} className="underline">START</a> to <span style={nowrap}>{formatPhone(a.sms_number)}</span> to get texts.</>
-          ) : (
-            "Text START to our number to get texts."
-          )}
-        </p>
+        a.sms_number ? (
+          <a href={`sms:${a.sms_number}?&body=START`} className={`${btn} mt-5 mr-3`} style={btnStyle}>
+            <span style={nowrap}>Text START to {formatPhone(a.sms_number)}</span>
+          </a>
+        ) : (
+          <p className="leading-relaxed mt-3" style={{ color: "var(--ink)" }}>Text START to our number to get texts.</p>
+        )
       )}
-      <Link href={`/careers/${slug}`} className="inline-flex items-center min-h-11 mt-6 rounded-full border px-5 py-2 font-sans-ui font-semibold text-sm" style={{ borderColor: "rgba(242, 233, 255, 0.4)", color: "var(--ink)" }}>
+      <Link href={`/careers/${slug}`} className={`${btn} mt-5`} style={btnStyle}>
         Back to jobs
       </Link>
     </>

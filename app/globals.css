@@ -127,7 +127,7 @@ select.ap-input {
 .ap-opt input[type="radio"] { border-radius: 50%; }
 .ap-opt input:checked, .ap-consent input:checked { border-color: transparent; box-shadow: var(--brand-ring); }
 .ap-opt input[type="checkbox"]:checked, .ap-consent input:checked {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='white' stroke-width='2.5'%3E%3Cpath d='M5 10.5l3.5 3.5L15 7'/%3E%3C/svg%3E") center / 100% no-repeat, var(--brand-fill);
+  background: var(--brand-check) center / 100% no-repeat, var(--brand-fill);
 }
 .ap-opt input[type="radio"]:checked { background: radial-gradient(circle, var(--brand-ink) 0 34%, transparent 38%), var(--brand-fill); }
 .ap-file {
@@ -161,3 +161,11 @@ select.ap-input {
 .ap-grid th[scope="col"] { font-size: 13px; letter-spacing: 0; }
 .ap-cell span { background: var(--bg-elevated); border-color: var(--border); }
 .ap-cell input:checked + span { background: var(--brand-fill); border-color: transparent; }
+
+/* round 4 */
+.ap-grid .hd-short { display: none; }
+@media (max-width: 359px) {
+  .ap-grid .hd-full { display: none; }
+  .ap-grid .hd-short { display: inline; }
+  .ap-opt { display: flex; width: 100%; }
+}
