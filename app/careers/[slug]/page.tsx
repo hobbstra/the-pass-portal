@@ -28,9 +28,9 @@ export default async function EmployerJobs({
   if (!employer) notFound();
   const wanted = (await searchParams).job;
   const fetched = await fetchOpenJobs(employer.slug);
-  const open = fetched ?? [];
+  const open = fetched?.jobs ?? [];
   const reachable = fetched !== null;
-  const brand = brandOf(open[0]?.brand_color ?? employer.brandColor);
+  const brand = brandOf(fetched?.brand_color);
   const closed = !!wanted && !open.some((j) => j.token === wanted);
   const describe = (title: string) => employer.postings.find((p) => p.title.toLowerCase() === title.toLowerCase());
   const smsNotice = employer.smsNumber && (

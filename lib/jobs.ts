@@ -24,8 +24,6 @@ export type Employer = {
   smsNumber?: string;
   // Registered 10DLC brand, named as the sender on the SMS terms page.
   legalName?: string;
-  // Used only when apply_jobs has no open row to carry brand_color (nothing open, or unreachable).
-  brandColor?: string;
   postings: JobPosting[];
 };
 
@@ -40,7 +38,6 @@ export const employers: Employer[] = [
     instagram: "https://www.instagram.com/swellssourdough/",
     smsNumber: "(858) 216-8955",
     legalName: "E&P Boulangerie LLC",
-    brandColor: "#e85d4a",
     postings: [
       {
         id: "barista",
@@ -133,7 +130,7 @@ export type OpenJob = {
 
 // Returns null when the RPC is unreachable or errors, so callers fall back to
 // "Apply by email" rather than rendering a broken form.
-export async function fetchOpenJobs(orgSlug: string): Promise<OpenJob[] | null> {
+export async function fetchOpenJobs(orgSlug: string): Promise<{ jobs: OpenJob[]; brand_color: string | null } | null> {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!base || !key) {
@@ -148,8 +145,14 @@ export async function fetchOpenJobs(orgSlug: string): Promise<OpenJob[] | null> 
       next: { revalidate: 60 },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const rows = (await res.json()) as OpenJob[];
-    return rows.map((r) => ({ ...r, questions: (r.questions ?? []).map((q) => ({ ...q, options: q.options ?? [] })) }));
+    // An org with nothing open comes back as ONE row with a null job_id (it still carries the brand);
+    // an unknown slug is zero rows. The null row is never rendered as a job.
+    const rows = (await res.json()) as (Omit<OpenJob, "job_id"> & { job_id: string | null })[];
+    const jobs = (rows.filter((r) => r.job_id !== null) as OpenJob[]).map((r) => ({
+      ...r,
+      questions: (r.questions ?? []).map((q) => ({ ...q, options: q.options ?? [] })),
+    }));
+    return { jobs, brand_color: rows[0]?.brand_color ?? null };
   } catch (e) {
     console.error("apply_jobs failed", e);
     return null;
