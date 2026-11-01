@@ -34,7 +34,7 @@ export const employers: Employer[] = [
     slug: "swells",
     name: "Swells Sourdough",
     tagline:
-      "A small sourdough bakery on the San Diego coast. We bake before sunrise and sell at the Little Italy Mercato and La Jolla Open Aire markets.",
+      "A family-owned sourdough bakery in Little Italy. Every loaf ferments 36 to 48 hours on certified organic flour. Find us at our shop on India St, the Little Italy Mercato on Saturdays and the La Jolla Open Aire Market on Sundays.",
     applyEmail: "jobs@swellsbakery.com",
     website: "https://swellssourdough.com",
     instagram: "https://www.instagram.com/swellssourdough/",
