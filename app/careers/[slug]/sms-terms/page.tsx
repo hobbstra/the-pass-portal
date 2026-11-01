@@ -24,7 +24,7 @@ export default async function SmsTerms({ params }: { params: Promise<{ slug: str
   const sender = employer.legalName ? `${employer.legalName}, doing business as ${employer.name}` : employer.name;
 
   return (
-    <PageShell>
+    <PageShell employer={employer}>
       <div className="max-w-3xl mx-auto px-6 py-12 leading-relaxed space-y-4">
         <h1 className="text-3xl font-semibold mb-2" style={{ color: "var(--ink)" }}>
           {employer.name} Applicant Text Messaging Terms

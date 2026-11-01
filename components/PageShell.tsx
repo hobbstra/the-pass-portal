@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function PageShell({ children }: { children: React.ReactNode }) {
+export default function PageShell({ children, employer }: { children: React.ReactNode; employer?: { name: string; slug: string } }) {
   return (
     <div className="min-h-screen flex flex-col">
       <header
@@ -8,8 +8,8 @@ export default function PageShell({ children }: { children: React.ReactNode }) {
         style={{ borderColor: "var(--border)", background: "rgba(13, 7, 22, 0.72)" }}
       >
         <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between font-sans-ui">
-          <Link href="/" className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
-            The Pass
+          <Link href={employer ? `/careers/${employer.slug}` : "/"} className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
+            {employer ? employer.name : "The Pass"}
           </Link>
         </div>
       </header>

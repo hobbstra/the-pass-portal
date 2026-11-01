@@ -82,7 +82,8 @@ export const employers: Employer[] = [
       },
       {
         id: "viennoiserie-baker",
-        title: "Viennoiserie Baker",
+        // Must match the job's title in Pass Admin: the card's details are matched by title.
+        title: "Production Baker (Sourdough & Viennoiserie)",
         employmentType: "Full-time",
         location: "San Diego, CA",
         pay: "$22–$26/hr + shared tips",
@@ -106,3 +107,55 @@ export const employers: Employer[] = [
 ];
 
 export const getEmployer = (slug: string) => employers.find((e) => e.slug === slug);
+
+// ---- Open jobs from the app's apply_jobs RPC (public, anon key) ----
+
+export type ApplyQuestion = {
+  id: string;
+  prompt: string;
+  kind: "yes_no" | "yes_no_soon" | "shifts" | "days_times";
+  options: { key: string; label: string }[];
+};
+
+export type OpenJob = {
+  org_name: string;
+  job_id: string;
+  title: string;
+  token: string;
+  questions: ApplyQuestion[];
+  consent_text: string | null;
+  fine_print: string | null;
+  brand_color: string | null;
+  sms_number: string | null; // E.164
+};
+
+// Returns null when the RPC is unreachable or errors, so callers fall back to
+// "Apply by email" rather than rendering a broken form.
+export async function fetchOpenJobs(orgSlug: string): Promise<{ jobs: OpenJob[]; brand_color: string | null } | null> {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!base || !key) {
+    console.error("apply_jobs: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY not set");
+    return null;
+  }
+  try {
+    const res = await fetch(`${base}/rest/v1/rpc/apply_jobs`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_slug: orgSlug }),
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    // An org with nothing open comes back as ONE row with a null job_id (it still carries the brand);
+    // an unknown slug is zero rows. The null row is never rendered as a job.
+    const rows = (await res.json()) as (Omit<OpenJob, "job_id"> & { job_id: string | null })[];
+    const jobs = (rows.filter((r) => r.job_id !== null) as OpenJob[]).map((r) => ({
+      ...r,
+      questions: (r.questions ?? []).map((q) => ({ ...q, options: q.options ?? [] })),
+    }));
+    return { jobs, brand_color: rows[0]?.brand_color ?? null };
+  } catch (e) {
+    console.error("apply_jobs failed", e);
+    return null;
+  }
+}
