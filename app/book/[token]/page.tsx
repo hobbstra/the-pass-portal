@@ -40,9 +40,9 @@ export default async function BookPage({ params }: { params: Promise<{ token: st
   if (!b.live) {
     return (
       <PageShell employer={employer}>
-        {message("This link has expired", b.booked_at
-          ? `You're still booked for ${whenText(b.booked_at, b.timezone)}. To change it, text us.`
-          : `Text us and we'll send you a new one.`, textUs)}
+        {b.booked_at
+          ? message(`You're booked for ${whenText(b.booked_at, b.timezone)}`, "This link can't change it any more. To change it, text us.", textUs)
+          : message("This link has expired", "Text us and we'll send you a new one.", textUs)}
       </PageShell>
     );
   }

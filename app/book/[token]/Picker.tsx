@@ -13,6 +13,8 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [booked, setBooked] = useState<string | null>(null);
+  // Just booked: the rule is a day before that time (the page's can_change was about the old one).
+  const [bookedCanChange, setBookedCanChange] = useState(false);
   const what = meetingWord(b.kind);
   const zone = zoneText(b.timezone);
   const days = useMemo(() => {
@@ -33,7 +35,7 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
 
   const done = booked ?? (!changing ? b.booked_at : null);
   if (done) {
-    const canChange = !!booked || b.can_change;
+    const canChange = booked ? bookedCanChange : !!b.can_change;
     const until = new Date(new Date(done).getTime() - 864e5);
     return (
       <>
@@ -89,7 +91,9 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
         setPick(null);
         router.refresh();
       } else {
-        setBooked(typeof body === "string" ? body : pick);
+        const at = typeof body === "string" ? body : pick;
+        setBooked(at);
+        setBookedCanChange(new Date(at).getTime() - 864e5 > Date.now());
         setChanging(false);
       }
     } catch {
