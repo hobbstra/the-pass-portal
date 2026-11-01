@@ -5,10 +5,9 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { OpenJob, ApplyQuestion } from "@/lib/jobs";
-import { brandVars } from "@/lib/brand";
 
 const labelCls = "block text-base font-semibold mb-2.5 font-sans-ui";
-const errColor = "#ff8f8f"; // on #160a24 this is ~9:1
+const errColor = "var(--error)";
 
 declare global {
   interface Window { turnstile?: { reset: () => void } }
@@ -42,6 +41,8 @@ function DaysGrid({ name, options }: { name: string; options: Opt[] }) {
   const byKey = new Map(options.map((o) => [o.key, o]));
   const fits = new Set(GRID_DAYS.flatMap(([d]) => GRID_PARTS.map(([p]) => `${d}_${p}`)));
   const extra = options.filter((o) => !fits.has(o.key));
+  // Nothing fits the grid: just the list, never seven empty rows.
+  if (extra.length === options.length) return <Options type="checkbox" name={name} options={extra} />;
   return (
     <>
       <table className="ap-grid font-sans-ui">
@@ -233,8 +234,8 @@ export default function ApplyForm({
   const avail = qs(["shifts"]);
   const about = qs(["yes_no", "yes_no_soon"]);
   return (
-    <section id="apply" className="rounded-lg border p-5 sm:p-8 mt-10 scroll-mt-24" style={{ ...brandVars(job.brand_color), borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
-      <h2 className="text-2xl font-semibold" style={{ color: "var(--ink)" }}>Apply to {orgName ?? job.org_name}</h2>
+    <section id="apply" className="rounded-lg border p-5 sm:p-8 mt-10 scroll-mt-24" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
+      <h2 className="text-2xl font-semibold mb-2" style={{ color: "var(--ink)" }}>Apply to {orgName ?? job.org_name}</h2>
       <form onSubmit={onSubmit}>
         <Section title="About you">
           <div>
@@ -260,6 +261,7 @@ export default function ApplyForm({
               aria-invalid={expError} aria-describedby={expError ? "exp-error" : undefined}
               onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
             />
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pass-violet)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}><path d="M12 16V4M7 9l5-5 5 5M5 20h14" /></svg>
             <span className="break-all">{fileName || "Add your résumé (PDF)"}</span>
           </label>
           <p className="mt-2 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }}>On Indeed? Open your résumé there and download it as a PDF.</p>
@@ -321,7 +323,6 @@ export default function ApplyForm({
         </button>
 
       </form>
-      <p className="mt-8 text-xs text-center font-sans-ui" style={{ color: "var(--ink-muted)" }}>Powered by The Pass</p>
     </section>
   );
 }
