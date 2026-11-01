@@ -141,6 +141,24 @@ export default async function EmployerJobs({
                     <div className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>{smsNotice}</div>
                   </>))}
         </div>
+
+        {employer.press && employer.press.length > 0 && (
+          <section aria-labelledby="press" className="mt-12">
+            <h2 id="press" className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--pass-violet)" }}>
+              {employer.name.split(" ")[0]} in the news
+            </h2>
+            <ul className="divide-y rounded-lg border" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
+              {employer.press.map((p) => (
+                <li key={p.url} style={{ borderColor: "var(--border)" }}>
+                  <a href={p.url} target="_blank" rel="noopener noreferrer" className="block px-4 py-3 min-h-11">
+                    <span className="block text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>{p.outlet}</span>
+                    <span className="block font-medium" style={{ color: "var(--ink)" }}>{p.title}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </PageShell>
   );
