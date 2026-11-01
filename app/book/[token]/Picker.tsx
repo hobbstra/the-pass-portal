@@ -113,7 +113,7 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
         {[b.job_title, `${b.minutes} minutes`, b.host_first_name && `with ${b.host_first_name}`].filter(Boolean).join(" · ")}
       </p>
       <p className="mb-8" style={{ color: "var(--ink-muted)" }}>
-        {where ? <>{where}{maps && <> (<a href={maps} className="underline">directions</a>)</>} · </> : ""}Times are {zone}
+        {where ? <>{where}{maps && <> · <a href={maps} className="underline">Directions</a></>} · </> : ""}Times are {zone}
       </p>
       {changing && b.booked_at && (
         <p className="mb-6 rounded-lg border p-4" style={{ borderColor: "var(--border)", background: "rgba(242, 233, 255, 0.06)", color: "var(--ink)" }}>
