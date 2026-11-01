@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { type Booking, dayText, icsHref, mapsHref, meetingWord, timeText, whenText, zoneText } from "@/lib/booking";
+import { type Booking, dayText, mapsHref, meetingWord, timeText, whenText, zoneText } from "@/lib/booking";
 import { formatPhone } from "@/lib/phone";
 
 // Pick a time (open times by day, in the business's time zone) or, once booked, what's booked and how to change it.
@@ -31,7 +31,7 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
     : b.place_name ? `At ${b.place_name}` : null;
   const maps = b.kind === "call" ? null : mapsHref(b);
   const textUs = b.sms_number && <a href={`sms:${b.sms_number}`} className="underline">text us at {formatPhone(b.sms_number)}</a>;
-  const eyebrow = <p className="text-sm font-semibold uppercase tracking-wider font-sans-ui mb-2" style={{ color: "var(--brand-accent)" }}>{b.org_name}</p>;
+  const eyebrow = b.careers_slug ? null : <p className="text-sm font-semibold uppercase tracking-wider font-sans-ui mb-2" style={{ color: "var(--brand-accent)" }}>{b.org_name}</p>;
 
   const done = booked ?? (!changing ? b.booked_at : null);
   if (done) {
@@ -45,7 +45,7 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
         </div>
         <h1 className="text-3xl font-medium mb-6" style={{ color: "var(--ink)" }}>You&apos;re booked{b.first_name ? `, ${b.first_name}` : ""}.</h1>
         <div role="status" className="rounded-lg border p-5 font-sans-ui" style={{ borderColor: "var(--border)", borderTop: "3px solid var(--brand-fill)", background: "var(--bg-elevated)", color: "var(--ink)" }}>
-          <p className="text-sm" style={{ color: "var(--ink-muted)" }}>{dayText(done, b.timezone)}</p>
+          <p className="text-lg font-semibold">{dayText(done, b.timezone)}</p>
           <p className="text-4xl font-semibold mt-1">{timeText(done, b.timezone)} <span className="text-base font-normal" style={{ color: "var(--ink-muted)" }}>{zone}</span></p>
           <p className="mt-3">
             {[`${b.minutes}-minute ${what}`, b.host_first_name && `with ${b.host_first_name}`].filter(Boolean).join(" ")}
@@ -53,7 +53,7 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
           </p>
           {where && <p className="mt-1">{where}{maps && <> · <a href={maps} className="underline">Directions</a></>}</p>}
           <div className="flex flex-wrap gap-3 mt-5">
-            <a href={icsHref(b, done)} download="interview.ics" className="bk-secondary">Add to calendar</a>
+            <a href={`/book/${token}/ics`} className="bk-secondary">Add to calendar</a>
             {canChange && (
               <button type="button" className="bk-secondary" onClick={() => { setBooked(null); setChanging(true); setPick(null); router.refresh(); }}>
                 Change time
@@ -63,7 +63,7 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
         </div>
         <p className="mt-4 font-sans-ui text-sm" style={{ color: "var(--ink-muted)" }}>
           {canChange
-            ? <>You can change it here until {until.toLocaleDateString("en-US", { timeZone: b.timezone, weekday: "short", month: "short", day: "numeric" })}{textUs ? <>; after that, {textUs}</> : null}.</>
+            ? <>You can change it here until {whenText(until.toISOString(), b.timezone)}{textUs ? <>; after that, {textUs}</> : null}.</>
             : <>It&apos;s less than a day away, so to change it, {textUs ?? "reply to our text"}.</>}
         </p>
       </>
@@ -112,8 +112,8 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
       <p className="mb-1" style={{ color: "var(--ink-muted)" }}>
         {[b.job_title, `${b.minutes} minutes`, b.host_first_name && `with ${b.host_first_name}`].filter(Boolean).join(" · ")}
       </p>
-      <p className="mb-8 text-sm" style={{ color: "var(--ink-muted)" }}>
-        {where ? `${where} · ` : ""}Times are {zone}
+      <p className="mb-8" style={{ color: "var(--ink-muted)" }}>
+        {where ? <>{where}{maps && <> (<a href={maps} className="underline">directions</a>)</>} · </> : ""}Times are {zone}
       </p>
       {changing && b.booked_at && (
         <p className="mb-6 rounded-lg border p-4" style={{ borderColor: "var(--border)", background: "rgba(242, 233, 255, 0.06)", color: "var(--ink)" }}>
@@ -141,7 +141,7 @@ export default function Picker({ token, booking: b }: { token: string; booking: 
             </fieldset>
           ))}
           {/* Room under the last row for the Book bar. */}
-          <p className="mb-24 text-sm" style={{ color: "var(--ink-muted)" }}>None of these work? {textUs ? <>Please {textUs}.</> : "Reply to our text."}</p>
+          <p className="mb-28 text-sm" style={{ color: "var(--ink-muted)" }}>None of these work? {textUs ? <>Please {textUs}.</> : "Reply to our text."}</p>
         </>
       )}
       {error && <p role="alert" className="mb-4" style={{ color: "var(--error)" }}>{error}</p>}

@@ -23,7 +23,7 @@ export default async function BookPage({ params }: { params: Promise<{ token: st
   const brand = brandOf(b && b !== "error" ? b.brand_color : null);
   const message = (title: string, body: React.ReactNode, action?: React.ReactNode) => (
     <div className="max-w-xl mx-auto px-6 py-14">
-      {b && b !== "error" && <p className="text-sm font-semibold uppercase tracking-wider font-sans-ui mb-2" style={{ color: brand.accent }}>{b.org_name}</p>}
+      {b && b !== "error" && !b.careers_slug && <p className="text-sm font-semibold uppercase tracking-wider font-sans-ui mb-2" style={{ color: brand.accent }}>{b.org_name}</p>}
       <h1 className="text-3xl font-medium mb-3" style={{ color: "var(--ink)" }}>{title}</h1>
       <p className="font-sans-ui" style={{ color: "var(--ink-muted)" }}>{body}</p>
       {action}

@@ -56,16 +56,17 @@ export const dayText = (iso: string, tz: string) =>
 export const timeText = (iso: string, tz: string) =>
   new Date(iso).toLocaleTimeString("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit" });
 
-// An .ics for the booked time, as a data: link (nothing stored server-side).
-export function icsHref(b: Booking, at: string) {
+// The booked time as an .ics file (served by /book/<token>/ics: iPhone Safari won't open a data: calendar).
+export function icsText(b: Booking, at: string, link: string) {
   const start = new Date(at), end = new Date(start.getTime() + (b.minutes ?? 30) * 60000);
   const z = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const esc = (t: string) => t.replace(/[\\;,]/g, (c) => "\\" + c);
+  const esc = (t: string) => t.replace(/[\\;,]/g, (c) => "\\" + c).replace(/\n/g, "\\n");
   const title = esc(`${b.kind === "trial" ? "Trial shift" : b.kind === "call" ? "Call" : "Interview"} at ${b.org_name}`);
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//The Pass//Booking//EN", "BEGIN:VEVENT",
-    `UID:${z(start)}-${b.org_name.length}@thepass.cloud`, `DTSTAMP:${z(start)}`, `DTSTART:${z(start)}`, `DTEND:${z(end)}`,
-    `SUMMARY:${title}`, ...(b.place_name ? [`LOCATION:${esc(b.place_name)}`] : []), "END:VEVENT", "END:VCALENDAR"];
-  return "data:text/calendar;charset=utf-8," + encodeURIComponent(lines.join("\r\n"));
+  const about = esc([b.host_first_name && `With ${b.host_first_name}`, `Change or check your time: ${link}`].filter(Boolean).join("\n"));
+  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//The Pass//Booking//EN", "BEGIN:VEVENT",
+    `UID:${z(start)}-${link.slice(-12)}@thepass.cloud`, `DTSTAMP:${z(start)}`, `DTSTART:${z(start)}`, `DTEND:${z(end)}`,
+    `SUMMARY:${title}`, `DESCRIPTION:${about}`, ...(b.place_name ? [`LOCATION:${esc(b.place_name)}`] : []),
+    "END:VEVENT", "END:VCALENDAR"].join("\r\n");
 }
 
 export const mapsHref = (b: Booking) =>
