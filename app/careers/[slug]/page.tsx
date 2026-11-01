@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import { employers, fetchOpenJobs, getEmployer, type JobPosting } from "@/lib/jobs";
-import { brandOf } from "@/lib/brand";
 import ApplyForm from "./ApplyForm";
 
 export const dynamicParams = false;
@@ -30,7 +29,6 @@ export default async function EmployerJobs({
   const fetched = await fetchOpenJobs(employer.slug);
   const open = fetched?.jobs ?? [];
   const reachable = fetched !== null;
-  const brand = brandOf(fetched?.brand_color);
   const closed = !!wanted && !open.some((j) => j.token === wanted);
   const describe = (title: string) => employer.postings.find((p) => p.title.toLowerCase() === title.toLowerCase());
   const smsNotice = employer.smsNumber && (
@@ -44,8 +42,8 @@ export default async function EmployerJobs({
       <Link href="/privacy#applicant-texts" className="underline">Privacy Policy</Link>.
     </p>
   );
-  const notice = (children: React.ReactNode, topBorder = false) => (
-    <p role="status" className="mb-6 rounded-lg border p-4 font-sans-ui" style={{ borderColor: "rgba(242, 233, 255, 0.22)", borderTop: topBorder ? `3px solid ${brand.fill}` : undefined, background: "rgba(242, 233, 255, 0.06)", color: "var(--ink)" }}>
+  const notice = (children: React.ReactNode) => (
+    <p role="status" className="mb-6 rounded-lg border p-4" style={{ borderColor: "var(--border)", background: "var(--tint)", color: "var(--ink)" }}>
       {children}
     </p>
   );
@@ -57,14 +55,14 @@ export default async function EmployerJobs({
       <a href={employer.instagram} target="_blank" rel="noopener noreferrer" className="underline">Instagram</a>
     </p>
   );
-  const card = (key: string, id: string, title: string, desc: JobPosting | undefined, cta: React.ReactNode, accent?: string) => (
-    <section key={key} id={id} className="rounded-lg border p-6 scroll-mt-24" style={{ borderColor: "var(--border)", borderTop: accent ? `3px solid ${accent}` : undefined, background: "var(--bg-elevated)" }}>
+  const card = (key: string, id: string, title: string, desc: JobPosting | undefined, cta: React.ReactNode, accent?: boolean) => (
+    <section key={key} id={id} className="rounded-lg border p-6 scroll-mt-24" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
       <h2 className="text-xl font-semibold" style={{ color: "var(--ink)" }}>{title}</h2>
       {desc ? (
         <>
           <p className="text-sm mt-1 mb-4 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
             {accent && (
-              <span className="inline-block rounded-full px-2.5 py-0.5 mr-2 text-xs font-semibold" style={{ background: brand.fill, color: brand.ink }}>{desc.employmentType}</span>
+              <span className="inline-block rounded-full px-2.5 py-0.5 mr-2 text-xs font-semibold" style={{ background: "var(--tint)", color: "var(--pass-violet)" }}>{desc.employmentType}</span>
             )}
             {[accent ? null : desc.employmentType, desc.location].filter(Boolean).join(" · ")}
             {desc.pay && <span className="block mt-1">{desc.pay}</span>}
@@ -83,7 +81,6 @@ export default async function EmployerJobs({
         <div className="mb-5" />
       )}
       {cta}
-      {links}
     </section>
   );
   const btn = "inline-flex items-center min-h-11 rounded-full px-5 py-2 font-sans-ui font-semibold text-sm";
@@ -91,40 +88,37 @@ export default async function EmployerJobs({
   return (
     <PageShell employer={employer}>
       <div className="max-w-3xl mx-auto px-6 py-12">
-        {!(reachable && open.length === 0) && (
-          <p className="text-sm mb-2 font-sans-ui" style={{ color: brand.accent }}>
-            Now hiring
-          </p>
-        )}
-        <h1 className="text-3xl font-semibold mb-3" style={{ color: "var(--ink)" }}>
-          Jobs at {employer.name}
-        </h1>
-        <p className="mb-10 leading-relaxed" style={{ color: "var(--ink-muted)" }}>
-          {employer.tagline}
-        </p>
-
-        {reachable && closed && notice(
-          open.length > 0 ? (
-            <>That job isn&apos;t open any more. <a href="#apply" className="underline">Pick one of the open jobs below.</a></>
-          ) : (
-            <>That job isn&apos;t open any more. We&apos;re not hiring right now. Check back soon.</>
-          ),
-          open.length === 0,
-        )}
-        {reachable && !closed && open.length === 0 && notice(<>We&apos;re not hiring right now. Check back soon.</>, true)}
-        {reachable && open.length === 0 && (
-          <a href={employer.website} target="_blank" rel="noopener noreferrer" className={btn} style={{ background: brand.fill, color: brand.ink }}>
-            Visit {employer.name}&apos;s website
-          </a>
+        {/* Not hiring: the message is the headline (no job cards follow). */}
+        {reachable && open.length === 0 ? (
+          <>
+            <h1 className="text-3xl font-semibold mb-3" style={{ color: "var(--ink)" }}>We&apos;re not hiring right now</h1>
+            <p className="mb-3 leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+              {closed ? "That job isn't open any more. " : ""}{employer.tagline}
+            </p>
+            <p className="mb-5 leading-relaxed" style={{ color: "var(--ink-muted)" }}>Check back soon, or follow along:</p>
+            <p className="flex flex-wrap gap-3 mb-10">
+              <a href={employer.website} target="_blank" rel="noopener noreferrer" className="bk-secondary">Visit our website</a>
+              <a href={employer.instagram} target="_blank" rel="noopener noreferrer" className="bk-secondary">Instagram</a>
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-sm font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--pass-violet)" }}>Now hiring</p>
+            <h1 className="text-3xl font-semibold mb-3" style={{ color: "var(--ink)" }}>Jobs at {employer.name}</h1>
+            <p className="mb-2 leading-relaxed" style={{ color: "var(--ink-muted)" }}>{employer.tagline}</p>
+            {links}
+            <div className="mb-10" />
+            {reachable && closed && notice(<>That job isn&apos;t open any more. <a href="#apply" className="underline">Pick one of the open jobs below.</a></>)}
+          </>
         )}
 
         <div className="space-y-6">
           {reachable
             ? open.map((j) =>
                 card(j.token, j.job_id, j.title, describe(j.title),
-                  <a href={`?job=${j.token}#apply`} className={btn} style={{ background: brand.fill, color: brand.ink, boxShadow: brand.ring }}>
+                  <a href={`?job=${j.token}#apply`} className={btn} style={{ background: "var(--pass-grad)", color: "#fff" }}>
                     Apply
-                  </a>, brand.fill))
+                  </a>, true))
             : // Email fallback keeps the registered notice on purpose: the phone is optional there.
               employer.postings.map((job) =>
                 card(job.id, job.id, job.title, job,
@@ -132,7 +126,7 @@ export default async function EmployerJobs({
                     <a
                       href={`mailto:${employer.applyEmail}?subject=${encodeURIComponent(`Application: ${job.title}`)}`}
                       className={btn}
-                      style={{ background: "var(--accent-gradient)", color: "var(--bg)" }}
+                      style={{ background: "var(--pass-grad)", color: "#fff" }}
                     >
                       Apply by email
                     </a>

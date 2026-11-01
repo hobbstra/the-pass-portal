@@ -106,7 +106,7 @@ body {
 
 /* ---- Apply form: native controls restyled for the dark page. Brand vars are set on the form. ---- */
 .ap-input {
-  width: 100%; min-height: 48px; border-radius: 8px; border: 1px solid rgba(242, 233, 255, 0.28);
+  width: 100%; min-height: 48px; border-radius: 8px; border: 1px solid var(--line);
   background: var(--bg); color: var(--ink); padding: 10px 12px; font-size: 16px;
 }
 .ap-input:focus-visible, .ap-file:focus-within, .ap-cell input:focus-visible + span, .ap-opt:has(:focus-visible), .ap-submit:focus-visible {
@@ -118,11 +118,11 @@ select.ap-input {
 }
 .ap-opt {
   display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px; border-radius: 8px;
-  border: 1px solid rgba(242, 233, 255, 0.28); font-size: 15px; color: var(--ink); cursor: pointer;
+  border: 1px solid var(--line); font-size: 15px; color: var(--ink); cursor: pointer;
 }
-.ap-opt:has(:checked) { border-color: var(--brand-fill); background: rgba(242, 233, 255, 0.06); }
+.ap-opt:has(:checked) { border-color: var(--brand-fill); background: var(--tint); }
 .ap-opt input, .ap-consent input {
-  appearance: none; flex: none; width: 20px; height: 20px; margin: 0; border: 1.5px solid rgba(242, 233, 255, 0.55);
+  appearance: none; flex: none; width: 20px; height: 20px; margin: 0; border: 1.5px solid var(--line-strong);
   background: var(--bg); cursor: pointer; border-radius: 5px;
 }
 .ap-opt input[type="radio"] { border-radius: 50%; }
@@ -133,7 +133,7 @@ select.ap-input {
 .ap-opt input[type="radio"]:checked { background: radial-gradient(circle, var(--brand-ink) 0 34%, transparent 38%), var(--brand-fill); }
 .ap-file {
   display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 64px; padding: 12px; text-align: center;
-  border: 1.5px dashed rgba(242, 233, 255, 0.45); border-radius: 8px; color: var(--ink); cursor: pointer; font-size: 15px;
+  border: 1.5px dashed var(--line-strong); border-radius: 8px; color: var(--ink); cursor: pointer; font-size: 15px;
 }
 .ap-file:hover { border-color: var(--brand-accent); }
 .ap-grid { border-collapse: separate; border-spacing: 4px; margin: -4px; }
@@ -143,7 +143,7 @@ select.ap-input {
 .ap-cell input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
 .ap-cell span {
   display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 8px; font-weight: 700;
-  border: 1px solid rgba(242, 233, 255, 0.28); background: var(--bg); color: transparent;
+  border: 1px solid var(--line); background: var(--bg); color: transparent;
 }
 .ap-cell input:checked + span { background: var(--brand-fill); color: var(--brand-ink); box-shadow: var(--brand-ring); border-color: transparent; }
 .ap-submit {
@@ -177,14 +177,46 @@ select.ap-input {
 .bk-time input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
 .bk-time span {
   display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 8px; font-size: 16px; font-weight: 600;
-  border: 1px solid rgba(242, 233, 255, 0.28); background: var(--bg-elevated); color: var(--ink);
+  border: 1px solid var(--line); background: var(--bg-elevated); color: var(--ink);
 }
 .bk-time input:checked + span { background: var(--brand-fill); color: var(--brand-ink); border-color: transparent; }
 .bk-time input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
 .bk-secondary {
   display: inline-flex; align-items: center; min-height: 44px; padding: 8px 18px; border-radius: 999px; font-weight: 600; font-size: 15px;
-  border: 1px solid rgba(242, 233, 255, 0.45); color: var(--ink);
+  border: 1px solid var(--line-strong); color: var(--ink);
 }
 .bk-secondary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 /* The Book bar appears once a time is picked, pinned to the bottom of the screen. */
 .bk-bar { position: sticky; bottom: 0; padding: 16px 0; background: linear-gradient(transparent, var(--bg) 30%); }
+
+/* ---- Applicant pages (careers, booking): light, The Pass's colours, the tenant's logo (owner, 2026-11-01). ---- */
+:root { --line: rgba(242, 233, 255, 0.28); --line-strong: rgba(242, 233, 255, 0.45); --tint: rgba(242, 233, 255, 0.06); }
+.applicant {
+  --bg: #faf8ff; --bg-elevated: #ffffff; --bg-card: #ffffff; --pass-surface: #ffffff;
+  --ink: #1a1030; --ink-muted: #5b5270; --border: #e9e4f5; --line: #8e83ad; --line-strong: #6f6590; --tint: #f3eefe;
+  --error: #b42318;
+  --pass-violet: #6d28d9;
+  /* The Synth Grid arc, a step deeper so white text reads (>= 5:1 at every stop). */
+  --pass-grad: linear-gradient(135deg, #d1168a 0%, #6d28d9 55%, #2563eb 100%);
+  --brand-fill: var(--pass-grad); --brand-ink: #fff; --brand-ring: none; --brand-accent: var(--pass-violet);
+  --brand-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23fff' stroke-width='2.5'%3E%3Cpath d='M5 10.5l3.5 3.5L15 7'/%3E%3C/svg%3E");
+  background: var(--bg); color: var(--ink);
+  border-top: 4px solid transparent; border-image: linear-gradient(90deg, #ff3cb4, #5ad8ff) 1;
+}
+.applicant .ap-input { background-color: #fff; }
+.applicant select.ap-input { background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%235b5270' stroke-width='2'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 14px center; }
+.applicant .ap-cell span { background: #faf8ff; border: 1px solid var(--line); }
+.applicant .ap-cell input:checked + span { background: var(--pass-grad); color: #fff; border-color: transparent; }
+.applicant .ap-opt:has(:checked) { border: 2px solid var(--pass-violet); background: var(--tint); }
+/* A gradient turns to mud in a 20px box: small controls are solid violet. */
+.applicant .ap-opt input:checked, .applicant .ap-consent input:checked { background-color: var(--pass-violet); }
+.applicant .ap-opt input[type="checkbox"]:checked, .applicant .ap-consent input:checked { background: var(--brand-check) center / 100% no-repeat, var(--pass-violet); }
+.applicant .ap-opt input[type="radio"]:checked { background: radial-gradient(circle, #fff 0 34%, transparent 38%), var(--pass-violet); }
+.applicant .ap-file { background: var(--bg); }
+.applicant .ap-file:hover, .applicant .ap-file:focus-within { border-color: var(--pass-violet); }
+.applicant .ap-submit { border-radius: 999px; }
+.applicant .ap-input:focus-visible, .applicant .ap-opt:has(:focus-visible), .applicant .ap-submit:focus-visible,
+.applicant .bk-time input:focus-visible + span, .applicant .bk-secondary:focus-visible { outline-color: var(--pass-violet); }
+.applicant .bk-bar { background: #fff; border-top: 1px solid var(--border); box-shadow: 0 -8px 24px rgba(26, 16, 48, 0.08); padding: 12px 0; margin: 0 -24px; padding-left: 24px; padding-right: 24px; }
+.tenant-logo { display: block; height: auto; max-height: 64px; max-width: min(200px, 55vw); object-fit: contain; mix-blend-mode: multiply; }
+@media (min-width: 768px) { .tenant-logo { max-height: 72px; } }

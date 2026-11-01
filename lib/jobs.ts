@@ -24,6 +24,8 @@ export type Employer = {
   smsNumber?: string;
   // Registered 10DLC brand, named as the sender on the SMS terms page.
   legalName?: string;
+  // The business's logo (public org-logos storage), shown in the applicant pages' header.
+  logo?: string;
   postings: JobPosting[];
 };
 
@@ -38,6 +40,7 @@ export const employers: Employer[] = [
     instagram: "https://www.instagram.com/swellssourdough/",
     smsNumber: "(858) 216-8955",
     legalName: "E&P Boulangerie LLC",
+    logo: "https://mgodxfznaahrgdzopykr.supabase.co/storage/v1/object/public/org-logos/00000000-0000-0000-0000-000000000001/logo-1791217153551.jpg",
     postings: [
       {
         id: "barista",
