@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { OpenJob, ApplyQuestion } from "@/lib/jobs";
 
 const labelCls = "block text-base font-semibold mb-2.5 font-sans-ui";
@@ -18,6 +18,8 @@ const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
 
 type Opt = { key: string; label: string };
 const YES_NO: Opt[] = [{ key: "yes", label: "Yes" }, { key: "no", label: "No" }];
+// The server's keys for yes_no_soon; used when a question arrives without its options.
+const YES_NO_SOON: Opt[] = [...YES_NO, { key: "soon", label: "I'll get one" }];
 
 function Options({ type, name, options }: { type: "checkbox" | "radio"; name: string; options: Opt[] }) {
   return (
@@ -86,7 +88,7 @@ function Question({ q }: { q: ApplyQuestion }) {
       input = <Options type="radio" name={name} options={q.options.length ? q.options : YES_NO} />;
       break;
     case "yes_no_soon":
-      input = <Options type="radio" name={name} options={q.options} />;
+      input = <Options type="radio" name={name} options={q.options.length ? q.options : YES_NO_SOON} />;
       break;
     case "shifts":
       input = <Options type="checkbox" name={name} options={q.options} />;
@@ -105,7 +107,7 @@ function Question({ q }: { q: ApplyQuestion }) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-10 first:mt-6">
+    <section className="mt-7 first:mt-5">
       <h3 className="text-sm font-semibold uppercase tracking-wider pb-2 mb-5 border-b font-sans-ui" style={{ color: "var(--brand-accent)", borderColor: "var(--border)" }}>
         {title}
       </h3>
@@ -134,14 +136,10 @@ function FinePrint({ text, slug }: { text: string; slug: string }) {
 }
 
 export default function ApplyForm({
-  slug, jobs, selected, orgName,
-}: { slug: string; jobs: OpenJob[]; selected: string; orgName?: string }) {
+  slug, jobs, selected, orgName, fixed = false,
+}: { slug: string; jobs: OpenJob[]; selected: string; orgName?: string; fixed?: boolean }) {
   const router = useRouter();
   const [token, setToken] = useState(selected);
-  // From a job link (Indeed): straight to the form, past the job cards.
-  useEffect(() => {
-    if (selected && jobs.some((j) => j.token === selected)) document.getElementById("apply")?.scrollIntoView();
-  }, [selected, jobs]);
   const [error, setError] = useState("");
   const [expError, setExpError] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -235,16 +233,19 @@ export default function ApplyForm({
   const about = qs(["yes_no", "yes_no_soon"]);
   return (
     <section id="apply" className="rounded-lg border p-5 sm:p-8 mt-10 scroll-mt-24" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
-      <h2 className="text-2xl font-semibold mb-2" style={{ color: "var(--ink)" }}>Apply to {orgName ?? job.org_name}</h2>
+      <h2 className="text-2xl font-semibold mb-2" style={{ color: "var(--ink)" }}>{fixed ? `Apply for ${job.title}` : `Apply to ${orgName ?? job.org_name}`}</h2>
       <form onSubmit={onSubmit}>
         <Section title="About you">
+          {/* On a job's own page the job is already chosen: no picker that could contradict the page. */}
+          {!fixed && (
+            <div className="mb-7">
+              <label htmlFor="job" className={labelCls}>Position</label>
+              <select id="job" value={job.token} onChange={(e) => setToken(e.target.value)} className="ap-input font-sans-ui">
+                {jobs.map((j) => <option key={j.token} value={j.token}>{j.title}</option>)}
+              </select>
+            </div>
+          )}
           <div>
-            <label htmlFor="job" className={labelCls}>Position</label>
-            <select id="job" value={job.token} onChange={(e) => setToken(e.target.value)} className="ap-input font-sans-ui">
-              {jobs.map((j) => <option key={j.token} value={j.token}>{j.title}</option>)}
-            </select>
-          </div>
-          <div className="mt-7">
             <label htmlFor="name" className={labelCls}>Full name</label>
             <input id="name" name="name" required maxLength={120} autoComplete="name" className="ap-input font-sans-ui" />
           </div>

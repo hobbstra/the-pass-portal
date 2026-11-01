@@ -220,3 +220,9 @@ select.ap-input {
 .applicant .bk-bar { background: #fff; border-top: 1px solid var(--border); box-shadow: 0 -8px 24px rgba(26, 16, 48, 0.08); padding: 12px 0; margin: 0 -24px; padding-left: 24px; padding-right: 24px; }
 .tenant-logo { display: block; height: auto; max-height: 64px; max-width: min(200px, 55vw); object-fit: contain; mix-blend-mode: multiply; }
 @media (min-width: 768px) { .tenant-logo { max-height: 72px; } }
+.job-details summary { list-style: none; }
+.job-details summary::-webkit-details-marker { display: none; }
+.job-details summary::after { content: ""; width: 8px; height: 8px; margin-left: 10px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-3px); transition: transform 0.15s; }
+.job-details[open] summary::after { transform: rotate(-135deg) translateY(-1px); }
+/* A job card on the list is one big tap target: its link covers the card. */
+.card-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }

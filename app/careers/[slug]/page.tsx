@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import { employers, fetchOpenJobs, getEmployer, type JobPosting } from "@/lib/jobs";
-import ApplyForm from "./ApplyForm";
 
 export const dynamicParams = false;
 
@@ -28,6 +27,8 @@ export default async function EmployerJobs({
   const wanted = (await searchParams).job;
   const fetched = await fetchOpenJobs(employer.slug);
   const open = fetched?.jobs ?? [];
+  // Old and Indeed links (?job=<token>) go to that job's own page; a closed one stays here and says so.
+  if (wanted && open.some((j) => j.token === wanted)) redirect(`/careers/${employer.slug}/${wanted}`);
   const reachable = fetched !== null;
   const closed = !!wanted && !open.some((j) => j.token === wanted);
   const describe = (title: string) => employer.postings.find((p) => p.title.toLowerCase() === title.toLowerCase());
@@ -56,7 +57,7 @@ export default async function EmployerJobs({
     </p>
   );
   const card = (key: string, id: string, title: string, desc: JobPosting | undefined, cta: React.ReactNode, accent?: boolean) => (
-    <section key={key} id={id} className="rounded-lg border p-6 scroll-mt-24" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
+    <section key={key} id={id} className="rounded-lg border p-6 scroll-mt-24 relative" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
       <h2 className="text-xl font-semibold" style={{ color: "var(--ink)" }}>{title}</h2>
       {desc ? (
         <>
@@ -68,6 +69,7 @@ export default async function EmployerJobs({
             {desc.pay && <span className="block mt-1">{desc.pay}</span>}
           </p>
           <p className="leading-relaxed mb-4">{desc.summary}</p>
+          {!accent && <>
           <h3 className="font-semibold mb-2">What you&rsquo;ll do</h3>
           <ul className="list-disc pl-5 space-y-1 mb-4" style={{ color: "var(--ink-muted)" }}>
             {desc.duties.map((d) => <li key={d}>{d}</li>)}
@@ -76,6 +78,7 @@ export default async function EmployerJobs({
           <ul className="list-disc pl-5 space-y-1 mb-6" style={{ color: "var(--ink-muted)" }}>
             {desc.requirements.map((r) => <li key={r}>{r}</li>)}
           </ul>
+          </>}
         </>
       ) : (
         <div className="mb-5" />
@@ -103,12 +106,13 @@ export default async function EmployerJobs({
           </>
         ) : (
           <>
+            {/* From a stale link, the answer to "where's my job?" comes first. */}
+            {reachable && closed && notice(<>That job&apos;s closed. Here&apos;s what&apos;s open.</>)}
             <p className="text-sm font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--pass-violet)" }}>Now hiring</p>
             <h1 className="text-3xl font-semibold mb-3" style={{ color: "var(--ink)" }}>Jobs at {employer.name}</h1>
             <p className="mb-2 leading-relaxed" style={{ color: "var(--ink-muted)" }}>{employer.tagline}</p>
             {links}
             <div className="mb-10" />
-            {reachable && closed && notice(<>That job isn&apos;t open any more. <a href="#apply" className="underline">Pick one of the open jobs below.</a></>)}
           </>
         )}
 
@@ -116,9 +120,9 @@ export default async function EmployerJobs({
           {reachable
             ? open.map((j) =>
                 card(j.token, j.job_id, j.title, describe(j.title),
-                  <a href={`?job=${j.token}#apply`} className={btn} style={{ background: "var(--pass-grad)", color: "#fff" }}>
-                    Apply
-                  </a>, true))
+                  <Link href={`/careers/${employer.slug}/${j.token}`} className={`${btn} card-link`} style={{ background: "var(--pass-grad)", color: "#fff" }}>
+                    See the job and apply
+                  </Link>, true))
             : // Email fallback keeps the registered notice on purpose: the phone is optional there.
               employer.postings.map((job) =>
                 card(job.id, job.id, job.title, job,
@@ -137,10 +141,6 @@ export default async function EmployerJobs({
                     <div className="text-sm mt-2 font-sans-ui" style={{ color: "var(--ink-muted)" }}>{smsNotice}</div>
                   </>))}
         </div>
-
-        {open.length > 0 && (
-          <ApplyForm slug={employer.slug} jobs={open} selected={wanted ?? ""} orgName={employer.name} />
-        )}
       </div>
     </PageShell>
   );
