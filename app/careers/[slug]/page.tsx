@@ -142,21 +142,37 @@ export default async function EmployerJobs({
                   </>))}
         </div>
 
+        {employer.about && (
+          <section aria-labelledby="about" className="mt-12">
+            <h2 id="about" className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--pass-violet)" }}>About {employer.name}</h2>
+            <p className="leading-relaxed" style={{ color: "var(--ink-muted)" }}>{employer.about}</p>
+          </section>
+        )}
         {employer.press && employer.press.length > 0 && (
-          <section aria-labelledby="press" className="mt-12">
-            <h2 id="press" className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--pass-violet)" }}>
-              {employer.name.split(" ")[0]} in the news
-            </h2>
+          <section aria-labelledby="press" className="mt-10">
+            <h2 id="press" className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--pass-violet)" }}>In the news</h2>
+            {/* The three biggest as rows; every other outlet still linked, on one line (owner wants all the coverage). */}
             <ul className="divide-y rounded-lg border" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
-              {employer.press.map((p) => (
+              {employer.press.slice(0, 3).map((p) => (
                 <li key={p.url} style={{ borderColor: "var(--border)" }}>
-                  <a href={p.url} target="_blank" rel="noopener noreferrer" className="block px-4 py-3 min-h-11">
-                    <span className="block text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>{p.outlet}</span>
-                    <span className="block font-medium" style={{ color: "var(--ink)" }}>{p.title}</span>
+                  <a href={p.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 min-h-11">
+                    <span className="flex-1">
+                      <span className="block text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>{p.outlet}</span>
+                      <span className="block font-medium" style={{ color: "var(--ink)" }}>{p.title}</span>
+                    </span>
+                    <span aria-hidden="true" style={{ color: "var(--pass-violet)" }}>&#8599;</span>
                   </a>
                 </li>
               ))}
             </ul>
+            {employer.press.length > 3 && (
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                Also in:{" "}
+                {employer.press.slice(3).map((p, i) => (
+                  <span key={p.url}>{i > 0 && " · "}<a href={p.url} target="_blank" rel="noopener noreferrer" className="underline">{p.outlet}</a></span>
+                ))}
+              </p>
+            )}
           </section>
         )}
       </div>

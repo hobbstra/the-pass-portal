@@ -17,6 +17,8 @@ export type Employer = {
   slug: string;
   name: string;
   tagline: string;
+  // The rest of the story, shown under the jobs so the jobs stay on the first screen.
+  about?: string;
   applyEmail: string;
   website: string;
   instagram: string;
@@ -36,7 +38,9 @@ export const employers: Employer[] = [
     slug: "swells",
     name: "Swells Sourdough",
     tagline:
-      "A family-owned sourdough bakery in Little Italy: old-world methods, California vibes. Every loaf is cold fermented at least 24 hours, with organic flour and ingredients you can feed your family. Find us at our shop on India St, the Little Italy Mercato on Saturdays and the La Jolla Open Aire Market on Sundays.",
+      "A family-owned sourdough bakery in Little Italy: old-world methods, California vibes.",
+    about:
+      "Every loaf is cold fermented at least 24 hours, with organic flour and ingredients you can feed your family. Find us at our shop on India St, the Little Italy Mercato on Saturdays and the La Jolla Open Aire Market on Sundays.",
     applyEmail: "jobs@swellsbakery.com",
     website: "https://swellssourdough.com",
     instagram: "https://www.instagram.com/swellssourdough/",
