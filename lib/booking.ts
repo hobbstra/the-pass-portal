@@ -13,6 +13,11 @@ export type Booking = {
   live: boolean;
   can_change: boolean;
   times: string[] | null;
+  careers_slug: string | null;
+  sms_number: string | null; // E.164: where "text us" goes
+  place_name: string | null; // where to come in (the business's main location)
+  place_lat: number | null;
+  place_lon: number | null;
 };
 
 // null = no such link; "error" = couldn't ask (shown as "try again", never as "expired").
@@ -39,6 +44,31 @@ export async function fetchBooking(token: string): Promise<Booking | null | "err
 }
 
 export const meetingWord = (k: Booking["kind"]) => (k === "call" ? "call" : k === "trial" ? "trial shift" : "interview");
+
+// "PT", "ET": the zone the times are in, said once.
+export function zoneText(tz: string, at = new Date()) {
+  return at.toLocaleTimeString("en-US", { timeZone: tz, timeZoneName: "short" }).split(" ").pop()?.replace(/[SD]T$/, "T") ?? tz;
+}
+
+export const dayText = (iso: string, tz: string) =>
+  new Date(iso).toLocaleDateString("en-US", { timeZone: tz, weekday: "long", month: "short", day: "numeric" });
+export const timeText = (iso: string, tz: string) =>
+  new Date(iso).toLocaleTimeString("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit" });
+
+// An .ics for the booked time, as a data: link (nothing stored server-side).
+export function icsHref(b: Booking, at: string) {
+  const start = new Date(at), end = new Date(start.getTime() + b.minutes * 60000);
+  const z = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const esc = (t: string) => t.replace(/[\\;,]/g, (c) => "\\" + c);
+  const title = esc(`${b.kind === "trial" ? "Trial shift" : b.kind === "call" ? "Call" : "Interview"} at ${b.org_name}`);
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//The Pass//Booking//EN", "BEGIN:VEVENT",
+    `UID:${z(start)}-${b.org_name.length}@thepass.cloud`, `DTSTAMP:${z(new Date())}`, `DTSTART:${z(start)}`, `DTEND:${z(end)}`,
+    `SUMMARY:${title}`, ...(b.place_name ? [`LOCATION:${esc(b.place_name)}`] : []), "END:VEVENT", "END:VCALENDAR"];
+  return "data:text/calendar;charset=utf-8," + encodeURIComponent(lines.join("\r\n"));
+}
+
+export const mapsHref = (b: Booking) =>
+  b.place_lat != null && b.place_lon != null ? `https://maps.apple.com/?q=${encodeURIComponent(b.place_name ?? b.org_name)}&ll=${b.place_lat},${b.place_lon}` : null;
 
 // "Tue, Nov 3 at 2:00 PM" in the business's time zone (the applicant comes to them).
 export function whenText(iso: string, tz: string) {

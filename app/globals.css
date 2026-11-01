@@ -13,6 +13,7 @@
   --ink: #f2e9ff;
   --ink-muted: #b3a6c9;
   --border: rgba(242, 233, 255, 0.12);
+  --error: #ff9db0;
 }
 
 body {
@@ -180,3 +181,10 @@ select.ap-input {
 }
 .bk-time input:checked + span { background: var(--brand-fill); color: var(--brand-ink); border-color: transparent; }
 .bk-time input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+.bk-secondary {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 8px 18px; border-radius: 999px; font-weight: 600; font-size: 15px;
+  border: 1px solid rgba(242, 233, 255, 0.45); color: var(--ink);
+}
+.bk-secondary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* The Book bar appears once a time is picked, pinned to the bottom of the screen. */
+.bk-bar { position: sticky; bottom: 0; padding: 16px 0; background: linear-gradient(transparent, var(--bg) 30%); }
