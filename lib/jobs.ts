@@ -17,6 +17,8 @@ export type Employer = {
   slug: string;
   name: string;
   tagline: string;
+  // The rest of the story, shown under the jobs so the jobs stay on the first screen.
+  about?: string;
   applyEmail: string;
   website: string;
   instagram: string;
@@ -26,6 +28,8 @@ export type Employer = {
   legalName?: string;
   // The business's logo (public org-logos storage), shown in the applicant pages' header.
   logo?: string;
+  // Press coverage, newest first: shown on the jobs page so applicants see who they'd work for.
+  press?: { outlet: string; title: string; url: string }[];
   postings: JobPosting[];
 };
 
@@ -34,13 +38,27 @@ export const employers: Employer[] = [
     slug: "swells",
     name: "Swells Sourdough",
     tagline:
-      "A family-owned sourdough bakery in Little Italy. Every loaf ferments 36 to 48 hours on certified organic flour. Find us at our shop on India St, the Little Italy Mercato on Saturdays and the La Jolla Open Aire Market on Sundays.",
+      "A family-owned sourdough bakery in Little Italy: old-world methods, California vibes.",
+    about:
+      "Every loaf is cold fermented at least 24 hours, with organic flour and ingredients you can feed your family. Find us at our shop on India St, the Little Italy Mercato on Saturdays and the La Jolla Open Aire Market on Sundays.",
     applyEmail: "jobs@swellsbakery.com",
     website: "https://swellssourdough.com",
     instagram: "https://www.instagram.com/swellssourdough/",
     smsNumber: "(858) 216-8955",
     legalName: "E&P Boulangerie LLC",
     logo: "https://mgodxfznaahrgdzopykr.supabase.co/storage/v1/object/public/org-logos/00000000-0000-0000-0000-000000000001/logo-1791217153551.jpg",
+    // From swellssourdough.com's "In the Press", plus the Business Journal profile (owner, 2026-11-01:
+    // "include swells in the news from the tribune and other sources").
+    press: [
+      { outlet: "Eater San Diego", title: "The Best New Restaurants in San Diego (October 2026)", url: "https://sandiego.eater.com/maps/best-new-san-diego-restaurants-heatmap" },
+      { outlet: "San Diego Union-Tribune", title: "Swells Sourdough opens new bakery in Little Italy", url: "https://www.sandiegouniontribune.com/2026/10/01/the-dish-swells-sourdough-opens-new-bakery-in-little-italy-today/" },
+      { outlet: "CBS 8", title: "Swells Sourdough Bakery opens store in downtown San Diego", url: "https://www.cbs8.com/video/news/community/cbs8-guests/swells-sourdough-bakery-opens-store-downtown-san-diego/509-96cd4ac7-867f-473e-b12d-62b6454a54aa" },
+      { outlet: "San Diego Business Journal", title: "Swells Sourdough Bakery makes waves", url: "https://sdbj.com/food/swells-sourdough-bakery-makes-waves/" },
+      { outlet: "SanDiegoVille", title: "Swells Sourdough Bakery to open first brick-and-mortar in Little Italy", url: "https://www.sandiegoville.com/2026/09/san-diegos-swells-sourdough-bakery-to.html" },
+      { outlet: "Patch", title: "Farmers market favorite opens first permanent store", url: "https://patch.com/california/san-diego/farmers-market-favorite-swells-sourdough-bakery-open-first-permanent-store-san" },
+      { outlet: "Hoodline", title: "Swells Sourdough Bakery opens in Little Italy", url: "https://hoodline.com/2026/09/little-italy-s-swells-sourdough-bakery-opens-storefront-after-years-at-the-mercato/" },
+      { outlet: "What Now San Diego", title: "Swells Sourdough Bakery to officially open in Little Italy", url: "https://whatnow.com/san-diego/restaurants/swells-sourdough-bakery-to-officially-open-in-little-italy-october-1-2026/" },
+    ],
     postings: [
       {
         id: "barista",
