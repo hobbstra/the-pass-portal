@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { OpenJob, ApplyQuestion } from "@/lib/jobs";
 import { brandVars } from "@/lib/brand";
 
@@ -133,10 +133,14 @@ function FinePrint({ text, slug }: { text: string; slug: string }) {
 }
 
 export default function ApplyForm({
-  slug, jobs, selected,
-}: { slug: string; jobs: OpenJob[]; selected: string }) {
+  slug, jobs, selected, orgName,
+}: { slug: string; jobs: OpenJob[]; selected: string; orgName?: string }) {
   const router = useRouter();
   const [token, setToken] = useState(selected);
+  // From a job link (Indeed): straight to the form, past the job cards.
+  useEffect(() => {
+    if (selected && jobs.some((j) => j.token === selected)) document.getElementById("apply")?.scrollIntoView();
+  }, [selected, jobs]);
   const [error, setError] = useState("");
   const [expError, setExpError] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -230,7 +234,7 @@ export default function ApplyForm({
   const about = qs(["yes_no", "yes_no_soon"]);
   return (
     <section id="apply" className="rounded-lg border p-5 sm:p-8 mt-10 scroll-mt-24" style={{ ...brandVars(job.brand_color), borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
-      <h2 className="text-2xl font-semibold" style={{ color: "var(--ink)" }}>Apply to {job.org_name}</h2>
+      <h2 className="text-2xl font-semibold" style={{ color: "var(--ink)" }}>Apply to {orgName ?? job.org_name}</h2>
       <form onSubmit={onSubmit}>
         <Section title="About you">
           <div>
@@ -258,6 +262,7 @@ export default function ApplyForm({
             />
             <span className="break-all">{fileName || "Add your résumé (PDF)"}</span>
           </label>
+          <p className="mt-2 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }}>On Indeed? Open your résumé there and download it as a PDF.</p>
           <div className="flex items-center gap-3 my-5 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }} aria-hidden="true">
             <span className="flex-1 border-t" style={{ borderColor: "var(--border)" }} />or<span className="flex-1 border-t" style={{ borderColor: "var(--border)" }} />
           </div>

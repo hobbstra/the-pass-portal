@@ -82,7 +82,8 @@ export const employers: Employer[] = [
       },
       {
         id: "viennoiserie-baker",
-        title: "Viennoiserie Baker",
+        // Must match the job's title in Pass Admin: the card's details are matched by title.
+        title: "Production Baker (Sourdough & Viennoiserie)",
         employmentType: "Full-time",
         location: "San Diego, CA",
         pay: "$22–$26/hr + shared tips",

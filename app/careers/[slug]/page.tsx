@@ -145,7 +145,7 @@ export default async function EmployerJobs({
         </div>
 
         {open.length > 0 && (
-          <ApplyForm slug={employer.slug} jobs={open} selected={wanted ?? ""} />
+          <ApplyForm slug={employer.slug} jobs={open} selected={wanted ?? ""} orgName={employer.name} />
         )}
       </div>
     </PageShell>
