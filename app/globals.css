@@ -169,3 +169,14 @@ select.ap-input {
   .ap-grid .hd-short { display: inline; }
   .ap-opt { display: flex; width: 100%; }
 }
+
+/* ---- Booking page: open times as tappable cells. Brand vars are set on the page. ---- */
+.bk-times { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.bk-time { position: relative; cursor: pointer; }
+.bk-time input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.bk-time span {
+  display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 8px; font-size: 16px; font-weight: 600;
+  border: 1px solid rgba(242, 233, 255, 0.28); background: var(--bg-elevated); color: var(--ink);
+}
+.bk-time input:checked + span { background: var(--brand-fill); color: var(--brand-ink); border-color: transparent; }
+.bk-time input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
