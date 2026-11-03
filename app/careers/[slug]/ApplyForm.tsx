@@ -173,9 +173,10 @@ export default function ApplyForm({
       setError("That file is over 5 MB.");
       return;
     }
-    if (!picked && !experience) {
+    // Résumé required (owner, 2026-11-03: "i need a resume. that's required").
+    if (!picked) {
       setExpError(true);
-      document.getElementById("experience")?.focus();
+      document.getElementById("resume")?.focus();
       return;
     }
     // Answers are option keys; the server checks them against the job's options.
@@ -273,15 +274,12 @@ export default function ApplyForm({
               onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
             />
             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pass-violet)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}><path d="M12 16V4M7 9l5-5 5 5M5 20h14" /></svg>
-            <span className="break-all">{fileName || "Add your résumé (PDF)"}</span>
+            <span className="break-all">{fileName || "Add your résumé (PDF, required)"}</span>
           </label>
           <p className="mt-2 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }}>On Indeed? Open your résumé there and download it as a PDF.</p>
-          <div className="flex items-center gap-3 my-5 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }} aria-hidden="true">
-            <span className="flex-1 border-t" style={{ borderColor: "var(--border)" }} />or<span className="flex-1 border-t" style={{ borderColor: "var(--border)" }} />
-          </div>
-          <label htmlFor="experience" className={labelCls}>Tell us about your experience</label>
-          <textarea id="experience" name="experience" rows={5} maxLength={8000} aria-invalid={expError} aria-describedby={expError ? "exp-error" : undefined} className="ap-input font-sans-ui" />
-          {expError && <p id="exp-error" role="alert" className="mt-2 text-sm font-sans-ui" style={{ color: errColor }}>Attach your résumé as a PDF or tell us about your experience.</p>}
+          {expError && <p id="exp-error" role="alert" className="mt-2 text-sm font-sans-ui" style={{ color: errColor }}>Attach your résumé as a PDF to apply.</p>}
+          <label htmlFor="experience" className={`${labelCls} mt-6`}>Anything else about your experience? (optional)</label>
+          <textarea id="experience" name="experience" rows={4} maxLength={8000} className="ap-input font-sans-ui" />
           {about.length > 0 && <div className="mt-7">{about.map((q) => <Question key={`${job.token}-${q.id}`} q={q} />)}</div>}
         </Section>
 
