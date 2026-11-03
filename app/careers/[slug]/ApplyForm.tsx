@@ -136,8 +136,10 @@ function FinePrint({ text, slug }: { text: string; slug: string }) {
 }
 
 export default function ApplyForm({
-  slug, jobs, selected, orgName, fixed = false,
-}: { slug: string; jobs: OpenJob[]; selected: string; orgName?: string; fixed?: boolean }) {
+  slug, jobs, selected, orgName, fixed = false, defaultName, defaultPhone,
+}: { slug: string; jobs: OpenJob[]; selected: string; orgName?: string; fixed?: boolean;
+     // From a personal link (they texted us first): already known, so filled in.
+     defaultName?: string; defaultPhone?: string }) {
   const router = useRouter();
   const [token, setToken] = useState(selected);
   const [error, setError] = useState("");
@@ -247,11 +249,11 @@ export default function ApplyForm({
           )}
           <div>
             <label htmlFor="name" className={labelCls}>Full name</label>
-            <input id="name" name="name" required maxLength={120} autoComplete="name" className="ap-input font-sans-ui" />
+            <input id="name" name="name" required maxLength={120} autoComplete="name" defaultValue={defaultName} className="ap-input font-sans-ui" />
           </div>
           <div className="mt-7">
             <label htmlFor="phone" className={labelCls}>Mobile phone</label>
-            <input id="phone" name="phone" type="tel" inputMode="tel" required autoComplete="tel" className="ap-input font-sans-ui" />
+            <input id="phone" name="phone" type="tel" inputMode="tel" required autoComplete="tel" defaultValue={defaultPhone} className="ap-input font-sans-ui" />
           </div>
         </Section>
 
