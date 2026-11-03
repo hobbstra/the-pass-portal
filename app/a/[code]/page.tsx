@@ -10,7 +10,7 @@ import ApplyForm from "../../careers/[slug]/ApplyForm";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
-type Opened = { careers_slug: string | null; job_token: string | null; phone: string | null; name: string | null };
+type Opened = { careers_slug: string | null; job_token: string | null; phone: string | null; name: string | null; lang?: string | null };
 
 async function open(code: string): Promise<Opened | null> {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -40,18 +40,19 @@ export default async function PersonalApplyPage({ params }: { params: Promise<{ 
   const job = jobs.find((j) => j.token === link.job_token);
   // Their job closed (or none was named): the jobs list, where they can pick another.
   if (!job) redirect(`/careers/${employer.slug}`);
+  const es = link.lang === "es";
   const pay = employer.postings.find((p) => p.title.toLowerCase() === job.title.toLowerCase())?.pay ?? employer.pay?.[job.title];
 
   return (
     <PageShell employer={employer}>
-      <div className="max-w-3xl mx-auto px-6 py-8">
+      <div className="max-w-3xl mx-auto px-6 py-8" lang={es ? "es" : undefined}>
         {/* The step before an interview, not a second application (recruiting critic, 2026-11-03). */}
-        <p className="text-sm font-semibold mb-1" style={{ color: "var(--pass-violet)" }}>You texted us about {job.title}</p>
-        <h1 className="text-3xl font-semibold mb-2" style={{ color: "var(--ink)" }}>Last step: about 3 minutes</h1>
-        <p className="leading-relaxed mb-1" style={{ color: "var(--ink-muted)" }}>Then we&rsquo;ll text you to set up an interview.</p>
+        <p className="text-sm font-semibold mb-1" style={{ color: "var(--pass-violet)" }}>{es ? `Nos escribiste sobre ${job.title}` : `You texted us about ${job.title}`}</p>
+        <h1 className="text-3xl font-semibold mb-2" style={{ color: "var(--ink)" }}>{es ? "Último paso: unos 3 minutos" : "Last step: about 3 minutes"}</h1>
+        <p className="leading-relaxed mb-1" style={{ color: "var(--ink-muted)" }}>{es ? "Después te enviaremos un mensaje para agendar una entrevista." : "Then we\u2019ll text you to set up an interview."}</p>
         {pay && <p className="text-sm mb-4" style={{ color: "var(--ink-muted)" }}>{pay}</p>}
         <ApplyForm slug={employer.slug} jobs={jobs} selected={job.token} orgName={employer.name} fixed
-                   defaultName={link.name ?? undefined} defaultPhone={link.phone ?? undefined} />
+                   defaultName={link.name ?? undefined} defaultPhone={link.phone ?? undefined} lang={es ? "es" : "en"} />
       </div>
     </PageShell>
   );

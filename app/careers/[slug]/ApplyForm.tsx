@@ -16,18 +16,66 @@ declare global {
 const MAX_RESUME = 5242880;
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
+type Lang = "en" | "es";
+
+const T = {
+  en: {
+    emptyFile: "That file is empty.", notPdf: "Please upload your résumé as a PDF.", bigFile: "That file is over 5 MB.",
+    failed: "Something went wrong sending your application. Please try again.",
+    network: "We couldn't reach the server. Check your connection and try again.",
+    applyFor: (t: string) => `Apply for ${t}`, applyTo: (o: string) => `Apply to ${o}`,
+    aboutYou: "About you", position: "Position", fullName: "Full name", phone: "Mobile phone",
+    experienceSec: "Your experience", addResume: "Add your résumé (PDF, required)",
+    indeed: "On Indeed? Open your résumé there and download it as a PDF.", resumeErr: "Attach your résumé as a PDF to apply.",
+    expLabel: "Anything else about your experience? (optional)", availability: "Availability",
+    available: (x: string) => `I\u2019m available to work ${x}`, and: " and ",
+    whenStart: "When can you start?", right: "Right away", onDate: "On a date", startDate: "Start date",
+    interview: "Interview", sending: "Sending…", send: "Send application",
+  },
+  es: {
+    emptyFile: "Ese archivo está vacío.", notPdf: "Por favor sube tu currículum en PDF.", bigFile: "Ese archivo pesa más de 5 MB.",
+    failed: "Algo salió mal al enviar tu solicitud. Inténtalo de nuevo.",
+    network: "No pudimos conectarnos al servidor. Revisa tu conexión e inténtalo de nuevo.",
+    applyFor: (t: string) => `Solicita el puesto de ${t}`, applyTo: (o: string) => `Solicita empleo en ${o}`,
+    aboutYou: "Sobre ti", position: "Puesto", fullName: "Nombre completo", phone: "Teléfono celular",
+    experienceSec: "Tu experiencia", addResume: "Agrega tu currículum (PDF, obligatorio)",
+    indeed: "¿Estás en Indeed? Abre tu currículum ahí y descárgalo en PDF.", resumeErr: "Adjunta tu currículum en PDF para enviar tu solicitud.",
+    expLabel: "¿Algo más sobre tu experiencia? (opcional)", availability: "Disponibilidad",
+    available: (x: string) => `Puedo trabajar ${x}`, and: " y ",
+    whenStart: "¿Cuándo puedes empezar?", right: "De inmediato", onDate: "En una fecha", startDate: "Fecha de inicio",
+    interview: "Entrevista", sending: "Enviando…", send: "Enviar solicitud",
+  },
+};
+
+// Questions and options come from the database. Only what is known here is translated (options by key,
+// prompts by exact English text); anything else stays as the database wrote it.
+const ES_OPT: Record<string, string> = {
+  yes: "Sí", no: "No", soon: "Voy a sacar una",
+  wd_am: "Entre semana, mañanas", wd_pm: "Entre semana, tardes", wd_eve: "Entre semana, noches", sat: "Sábado", sun: "Domingo",
+};
+const ES_PROMPT: Record<string, string> = {
+  "I'm authorized to work in the United States and can provide proof.": "Estoy autorizado(a) para trabajar en Estados Unidos y puedo presentar comprobante.",
+  "I have a food handler card.": "Tengo mi tarjeta de manejo de alimentos (food handler).",
+  "Shifts I can work": "Turnos en los que puedo trabajar",
+  "When I can come in for an interview": "Cuándo puedo venir a una entrevista",
+};
+const ES_DAYS: Record<string, string> = { mon: "Lun", tue: "Mar", wed: "Mié", thu: "Jue", fri: "Vie", sat: "Sáb", sun: "Dom" };
+const ES_PARTS: Record<string, [string, string]> = { am: ["Mañana", "Mañ"], pm: ["Tarde", "Tarde"], eve: ["Noche", "Noche"] };
+
+const optLabel = (lang: Lang, o: { key: string; label: string }) => (lang === "es" && ES_OPT[o.key]) || o.label;
+
 type Opt = { key: string; label: string };
 const YES_NO: Opt[] = [{ key: "yes", label: "Yes" }, { key: "no", label: "No" }];
 // The server's keys for yes_no_soon; used when a question arrives without its options.
 const YES_NO_SOON: Opt[] = [...YES_NO, { key: "soon", label: "I'll get one" }];
 
-function Options({ type, name, options }: { type: "checkbox" | "radio"; name: string; options: Opt[] }) {
+function Options({ type, name, options, lang }: { type: "checkbox" | "radio"; name: string; options: Opt[]; lang: Lang }) {
   return (
     <div className="flex flex-wrap gap-2.5">
       {options.map((o) => (
         <label key={o.key} className="ap-opt font-sans-ui">
           <input type={type} name={name} value={o.key} />
-          {o.label}
+          {optLabel(lang, o)}
         </label>
       ))}
     </div>
@@ -39,32 +87,32 @@ const GRID_PARTS = [["am", "Morning", "Morn"], ["pm", "Afternoon", "Aft"], ["eve
 
 // Days down the side, parts of the day across the top, from keys like "mon_am".
 // A key that does not fit the pattern is listed under the grid, never dropped.
-function DaysGrid({ name, options }: { name: string; options: Opt[] }) {
+function DaysGrid({ name, options, lang }: { name: string; options: Opt[]; lang: Lang }) {
   const byKey = new Map(options.map((o) => [o.key, o]));
   const fits = new Set(GRID_DAYS.flatMap(([d]) => GRID_PARTS.map(([p]) => `${d}_${p}`)));
   const extra = options.filter((o) => !fits.has(o.key));
   // Nothing fits the grid: just the list, never seven empty rows.
-  if (extra.length === options.length) return <Options type="checkbox" name={name} options={extra} />;
+  if (extra.length === options.length) return <Options type="checkbox" name={name} options={extra} lang={lang} />;
   return (
     <>
       <table className="ap-grid font-sans-ui">
         <thead>
           <tr>
             <td />
-            {GRID_PARTS.map(([, label, short]) => <th key={label} scope="col"><span className="hd-full">{label}</span><span className="hd-short">{short}</span></th>)}
+            {GRID_PARTS.map(([p, label, short]) => <th key={label} scope="col"><span className="hd-full">{lang === "es" ? ES_PARTS[p][0] : label}</span><span className="hd-short">{lang === "es" ? ES_PARTS[p][1] : short}</span></th>)}
           </tr>
         </thead>
         <tbody>
           {GRID_DAYS.map(([d, dayLabel]) => (
             <tr key={d}>
-              <th scope="row">{dayLabel}</th>
+              <th scope="row">{lang === "es" ? ES_DAYS[d] : dayLabel}</th>
               {GRID_PARTS.map(([p, partLabel]) => {
                 const o = byKey.get(`${d}_${p}`);
                 return (
                   <td key={p}>
                     {o && (
                       <label className="ap-cell">
-                        <input type="checkbox" name={name} value={o.key} aria-label={o.label || `${dayLabel} ${partLabel}`} />
+                        <input type="checkbox" name={name} value={o.key} aria-label={lang === "es" ? `${ES_DAYS[d]} ${ES_PARTS[p][0]}` : o.label || `${dayLabel} ${partLabel}`} />
                         <span aria-hidden="true">&#10003;</span>
                       </label>
                     )}
@@ -75,31 +123,31 @@ function DaysGrid({ name, options }: { name: string; options: Opt[] }) {
           ))}
         </tbody>
       </table>
-      {extra.length > 0 && <div className="mt-4"><Options type="checkbox" name={name} options={extra} /></div>}
+      {extra.length > 0 && <div className="mt-4"><Options type="checkbox" name={name} options={extra} lang={lang} /></div>}
     </>
   );
 }
 
-function Question({ q }: { q: ApplyQuestion }) {
+function Question({ q, lang }: { q: ApplyQuestion; lang: Lang }) {
   const name = `q_${q.id}`;
   let input;
   switch (q.kind) {
     case "yes_no":
-      input = <Options type="radio" name={name} options={q.options.length ? q.options : YES_NO} />;
+      input = <Options type="radio" name={name} options={q.options.length ? q.options : YES_NO} lang={lang} />;
       break;
     case "yes_no_soon":
-      input = <Options type="radio" name={name} options={q.options.length ? q.options : YES_NO_SOON} />;
+      input = <Options type="radio" name={name} options={q.options.length ? q.options : YES_NO_SOON} lang={lang} />;
       break;
     case "shifts":
-      input = <Options type="checkbox" name={name} options={q.options} />;
+      input = <Options type="checkbox" name={name} options={q.options} lang={lang} />;
       break;
     case "days_times":
-      input = <DaysGrid name={name} options={q.options} />;
+      input = <DaysGrid name={name} options={q.options} lang={lang} />;
       break;
   }
   return (
     <fieldset className="mt-7 first:mt-0 min-w-0">
-      <legend className={labelCls} style={{ color: "var(--ink)" }}>{q.prompt}</legend>
+      <legend className={labelCls} style={{ color: "var(--ink)" }}>{(lang === "es" && ES_PROMPT[q.prompt]) || q.prompt}</legend>
       {input}
     </fieldset>
   );
@@ -136,10 +184,11 @@ function FinePrint({ text, slug }: { text: string; slug: string }) {
 }
 
 export default function ApplyForm({
-  slug, jobs, selected, orgName, fixed = false, defaultName, defaultPhone,
+  slug, jobs, selected, orgName, fixed = false, defaultName, defaultPhone, lang = "en",
 }: { slug: string; jobs: OpenJob[]; selected: string; orgName?: string; fixed?: boolean;
      // From a personal link (they texted us first): already known, so filled in.
-     defaultName?: string; defaultPhone?: string }) {
+     defaultName?: string; defaultPhone?: string; lang?: Lang }) {
+  const t = T[lang];
   const router = useRouter();
   const [token, setToken] = useState(selected);
   const [error, setError] = useState("");
@@ -162,15 +211,15 @@ export default function ApplyForm({
     const file = f.get("resume");
     const picked = file instanceof File && file.name !== "";
     if (picked && file.size === 0) {
-      setError("That file is empty.");
+      setError(t.emptyFile);
       return;
     }
     if (picked && file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-      setError("Please upload your résumé as a PDF.");
+      setError(t.notPdf);
       return;
     }
     if (picked && file.size > MAX_RESUME) {
-      setError("That file is over 5 MB.");
+      setError(t.bigFile);
       return;
     }
     // Résumé required (owner, 2026-11-03: "i need a resume. that's required").
@@ -213,7 +262,7 @@ export default function ApplyForm({
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         console.error(`apply-submit rejected: HTTP ${res.status}`); // status only, never form data
-        setError(data.error || "Something went wrong sending your application. Please try again.");
+        setError(data.error || t.failed);
         window.turnstile?.reset();
         setBusy(false);
         return;
@@ -227,7 +276,7 @@ export default function ApplyForm({
       router.push(`/careers/${slug}/thanks`); // busy stays true: no double submit
     } catch {
       console.error("apply-submit network error");
-      setError("We couldn't reach the server. Check your connection and try again.");
+      setError(t.network);
       window.turnstile?.reset();
       setBusy(false);
     }
@@ -238,35 +287,35 @@ export default function ApplyForm({
   // "I'm available to work Saturday and Sunday": the needed shifts' own labels, joined as a sentence.
   const shiftOptions = avail[0]?.options ?? [];
   const needed = (job.required_shifts ?? []).filter((k) => shiftOptions.some((o) => o.key === k));
-  const neededLabels = needed.map((k) => shiftOptions.find((o) => o.key === k)?.label ?? k);
+  const neededLabels = needed.map((k) => { const o = shiftOptions.find((x) => x.key === k); return o ? optLabel(lang, o) : k; });
   const neededText = neededLabels.length < 2 ? neededLabels.join("")
-    : `${neededLabels.slice(0, -1).join(", ")} and ${neededLabels[neededLabels.length - 1]}`;
+    : `${neededLabels.slice(0, -1).join(", ")}${t.and}${neededLabels[neededLabels.length - 1]}`;
   const about = qs(["yes_no", "yes_no_soon"]);
   return (
     <section id="apply" className="rounded-lg border p-5 sm:p-8 mt-10 scroll-mt-24" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
-      <h2 className="text-2xl font-semibold mb-2" style={{ color: "var(--ink)" }}>{fixed ? `Apply for ${job.title}` : `Apply to ${orgName ?? job.org_name}`}</h2>
+      <h2 className="text-2xl font-semibold mb-2" style={{ color: "var(--ink)" }}>{fixed ? t.applyFor(job.title) : t.applyTo(orgName ?? job.org_name)}</h2>
       <form onSubmit={onSubmit}>
-        <Section title="About you">
+        <Section title={t.aboutYou}>
           {/* On a job's own page the job is already chosen: no picker that could contradict the page. */}
           {!fixed && (
             <div className="mb-7">
-              <label htmlFor="job" className={labelCls}>Position</label>
+              <label htmlFor="job" className={labelCls}>{t.position}</label>
               <select id="job" value={job.token} onChange={(e) => setToken(e.target.value)} className="ap-input font-sans-ui">
                 {jobs.map((j) => <option key={j.token} value={j.token}>{j.title}</option>)}
               </select>
             </div>
           )}
           <div>
-            <label htmlFor="name" className={labelCls}>Full name</label>
+            <label htmlFor="name" className={labelCls}>{t.fullName}</label>
             <input id="name" name="name" required maxLength={120} autoComplete="name" defaultValue={defaultName} className="ap-input font-sans-ui" />
           </div>
           <div className="mt-7">
-            <label htmlFor="phone" className={labelCls}>Mobile phone</label>
+            <label htmlFor="phone" className={labelCls}>{t.phone}</label>
             <input id="phone" name="phone" type="tel" inputMode="tel" required autoComplete="tel" defaultValue={defaultPhone} className="ap-input font-sans-ui" />
           </div>
         </Section>
 
-        <Section title="Your experience">
+        <Section title={t.experienceSec}>
           <label htmlFor="resume" className="ap-file font-sans-ui" style={expError ? { borderColor: errColor } : undefined}>
             <input
               id="resume" name="resume" type="file" accept="application/pdf" className="sr-only"
@@ -274,41 +323,41 @@ export default function ApplyForm({
               onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
             />
             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pass-violet)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}><path d="M12 16V4M7 9l5-5 5 5M5 20h14" /></svg>
-            <span className="break-all">{fileName || "Add your résumé (PDF, required)"}</span>
+            <span className="break-all">{fileName || t.addResume}</span>
           </label>
-          <p className="mt-2 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }}>On Indeed? Open your résumé there and download it as a PDF.</p>
-          {expError && <p id="exp-error" role="alert" className="mt-2 text-sm font-sans-ui" style={{ color: errColor }}>Attach your résumé as a PDF to apply.</p>}
-          <label htmlFor="experience" className={`${labelCls} mt-6`}>Anything else about your experience? (optional)</label>
+          <p className="mt-2 text-sm font-sans-ui" style={{ color: "var(--ink-muted)" }}>{t.indeed}</p>
+          {expError && <p id="exp-error" role="alert" className="mt-2 text-sm font-sans-ui" style={{ color: errColor }}>{t.resumeErr}</p>}
+          <label htmlFor="experience" className={`${labelCls} mt-6`}>{t.expLabel}</label>
           <textarea id="experience" name="experience" rows={4} maxLength={8000} className="ap-input font-sans-ui" />
-          {about.length > 0 && <div className="mt-7">{about.map((q) => <Question key={`${job.token}-${q.id}`} q={q} />)}</div>}
+          {about.length > 0 && <div className="mt-7">{about.map((q) => <Question key={`${job.token}-${q.id}`} q={q} lang={lang} />)}</div>}
         </Section>
 
-        <Section title="Availability">
+        <Section title={t.availability}>
           {needed.length > 0 && (
             // One required acknowledgement, apart from the shift picks below (owner, 2026-11-03).
             <label className="flex items-start gap-3 mb-6 font-sans-ui font-semibold" style={{ color: "var(--ink)" }}>
               <input type="checkbox" name="needed_shifts" required className="mt-1 h-5 w-5 shrink-0" />
-              <span>I&rsquo;m available to work {neededText}</span>
+              <span>{t.available(neededText)}</span>
             </label>
           )}
-          {avail.map((q) => <Question key={`${job.token}-${q.id}`} q={q} />)}
+          {avail.map((q) => <Question key={`${job.token}-${q.id}`} q={q} lang={lang} />)}
           <fieldset className={`min-w-0 ${avail.length ? "mt-7" : ""}`}>
-            <legend className={labelCls} style={{ color: "var(--ink)" }}>When can you start?</legend>
+            <legend className={labelCls} style={{ color: "var(--ink)" }}>{t.whenStart}</legend>
             <div className="flex flex-wrap gap-2.5 items-center">
               <label className="ap-opt font-sans-ui">
-                <input type="radio" name="start_mode" checked={soon} onChange={() => setSoon(true)} /> Right away
+                <input type="radio" name="start_mode" checked={soon} onChange={() => setSoon(true)} /> {t.right}
               </label>
               <label className="ap-opt font-sans-ui">
-                <input type="radio" name="start_mode" checked={!soon} onChange={() => setSoon(false)} /> On a date
+                <input type="radio" name="start_mode" checked={!soon} onChange={() => setSoon(false)} /> {t.onDate}
               </label>
-              {!soon && <input type="date" name="start_date" required min={ymd(today)} max={ymd(nextYear)} aria-label="Start date" className="ap-input font-sans-ui !w-auto" />}
+              {!soon && <input type="date" name="start_date" required min={ymd(today)} max={ymd(nextYear)} aria-label={t.startDate} className="ap-input font-sans-ui !w-auto" />}
             </div>
           </fieldset>
         </Section>
 
         {days.length > 0 && (
-          <Section title="Interview">
-            {days.map((q) => <Question key={`${job.token}-${q.id}`} q={q} />)}
+          <Section title={t.interview}>
+            {days.map((q) => <Question key={`${job.token}-${q.id}`} q={q} lang={lang} />)}
           </Section>
         )}
 
@@ -335,7 +384,7 @@ export default function ApplyForm({
 
         {error && <p role="alert" className="mt-6 text-sm font-sans-ui" style={{ color: errColor }}>{error}</p>}
         <button type="submit" disabled={busy} className="ap-submit font-sans-ui mt-6">
-          {busy ? "Sending…" : "Send application"}
+          {busy ? t.sending : t.send}
         </button>
 
       </form>
