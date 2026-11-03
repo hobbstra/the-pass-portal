@@ -151,6 +151,8 @@ export type OpenJob = {
   fine_print: string | null;
   brand_color: string | null;
   sms_number: string | null; // E.164
+  // Shifts the job needs (option keys of the shifts question); the form asks one acknowledgement.
+  required_shifts?: string[] | null;
 };
 
 // Returns null when the RPC is unreachable or errors, so callers fall back to
