@@ -182,7 +182,9 @@ export default function ApplyForm({
     const answers: Record<string, unknown> = {};
     for (const q of job.questions) {
       const n = `q_${q.id}`;
-      if (q.kind === "shifts" || q.kind === "days_times") answers[q.id] = f.getAll(n);
+      // The job's needed shifts, acknowledged once, count as shifts they can work (owner, 2026-11-03).
+      if (q.kind === "shifts") answers[q.id] = Array.from(new Set([...f.getAll(n).map(String), ...needed]));
+      else if (q.kind === "days_times") answers[q.id] = f.getAll(n);
       else {
         const v = String(f.get(n) ?? "");
         if (!v) continue;
@@ -232,6 +234,12 @@ export default function ApplyForm({
 
   const days = qs(["days_times"]);
   const avail = qs(["shifts"]);
+  // "I'm available to work Saturday and Sunday": the needed shifts' own labels, joined as a sentence.
+  const shiftOptions = avail[0]?.options ?? [];
+  const needed = (job.required_shifts ?? []).filter((k) => shiftOptions.some((o) => o.key === k));
+  const neededLabels = needed.map((k) => shiftOptions.find((o) => o.key === k)?.label ?? k);
+  const neededText = neededLabels.length < 2 ? neededLabels.join("")
+    : `${neededLabels.slice(0, -1).join(", ")} and ${neededLabels[neededLabels.length - 1]}`;
   const about = qs(["yes_no", "yes_no_soon"]);
   return (
     <section id="apply" className="rounded-lg border p-5 sm:p-8 mt-10 scroll-mt-24" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
@@ -278,6 +286,13 @@ export default function ApplyForm({
         </Section>
 
         <Section title="Availability">
+          {needed.length > 0 && (
+            // One required acknowledgement, apart from the shift picks below (owner, 2026-11-03).
+            <label className="flex items-start gap-3 mb-6 font-sans-ui font-semibold" style={{ color: "var(--ink)" }}>
+              <input type="checkbox" name="needed_shifts" required className="mt-1 h-5 w-5 shrink-0" />
+              <span>I&rsquo;m available to work {neededText}</span>
+            </label>
+          )}
           {avail.map((q) => <Question key={`${job.token}-${q.id}`} q={q} />)}
           <fieldset className={`min-w-0 ${avail.length ? "mt-7" : ""}`}>
             <legend className={labelCls} style={{ color: "var(--ink)" }}>When can you start?</legend>
