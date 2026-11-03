@@ -30,6 +30,8 @@ export type Employer = {
   logo?: string;
   // Press coverage, newest first: shown on the jobs page so applicants see who they'd work for.
   press?: { outlet: string; title: string; url: string }[];
+  // Pay for an open job with no written posting yet, by its title (owner, 2026-11-03).
+  pay?: Record<string, string>;
   postings: JobPosting[];
 };
 
@@ -59,6 +61,7 @@ export const employers: Employer[] = [
       { outlet: "Hoodline", title: "Swells Sourdough Bakery opens in Little Italy", url: "https://hoodline.com/2026/09/little-italy-s-swells-sourdough-bakery-opens-storefront-after-years-at-the-mercato/" },
       { outlet: "What Now San Diego", title: "Swells Sourdough Bakery to officially open in Little Italy", url: "https://whatnow.com/san-diego/restaurants/swells-sourdough-bakery-to-officially-open-in-little-italy-october-1-2026/" },
     ],
+    pay: { "Junior Baker": "$18–$22/hr" },
     postings: [
       {
         id: "barista",

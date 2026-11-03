@@ -24,6 +24,7 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
   // Closed, renamed away, or the jobs couldn't be read: the list says which, and offers the rest.
   if (!job) redirect(`/careers/${employer.slug}?job=${encodeURIComponent(token)}`);
   const desc = employer.postings.find((p) => p.title.toLowerCase() === job.title.toLowerCase());
+  const pay = desc?.pay ?? employer.pay?.[job.title];
 
   return (
     <PageShell employer={employer}>
@@ -34,6 +35,7 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
           </Link>
         )}
         <h1 className="text-3xl font-semibold mb-2" style={{ color: "var(--ink)" }}>{job.title}</h1>
+        {!desc && pay && <p className="text-sm mb-4" style={{ color: "var(--ink-muted)" }}>{pay}</p>}
         {desc && (
           <>
             <p className="text-sm mb-4" style={{ color: "var(--ink-muted)" }}>
