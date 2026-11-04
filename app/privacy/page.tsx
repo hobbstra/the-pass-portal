@@ -148,7 +148,8 @@ export default function PrivacyPolicy() {
         We retain information for as long as the Customer's account is
         active, and for a reasonable period afterward to allow account
         recovery and to meet legal/record-keeping obligations. A Customer
-        or individual user may request deletion of their data by contacting
+        or individual user may delete their account as described on our{" "}
+        <a href="/delete-account" className="underline">Delete your account</a> page, or request deletion of their data by contacting
         us at the address below, subject to any legal retention
         requirements (for example, payroll and financial records may need
         to be retained for a minimum period regardless of a deletion

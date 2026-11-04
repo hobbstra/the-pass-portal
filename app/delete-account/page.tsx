@@ -20,21 +20,24 @@ export default function DeleteAccount() {
       <p>
         Email <a href="mailto:support@thepass.cloud?subject=Delete%20my%20account" className="underline">support@thepass.cloud</a>{" "}
         from the email on your account, or include your name, your workplace and the phone number you sign in with.
-        You can also ask your manager, who can delete it for you. We delete it within 30 days.
+        We pass it to your workplace&apos;s owner, who deletes it in The Pass, and we confirm with you when it&apos;s
+        done, within 30 days. You can also ask the owner directly.
       </p>
 
       <h2 className={h2} style={{ color: "var(--ink)" }}>What&apos;s deleted</h2>
       <ul className="list-disc pl-6 space-y-2">
         <li>Your sign-in: you can&apos;t sign in again.</li>
         <li>The email address and phone number on your login.</li>
-        <li>Your clock-in PIN and the app&apos;s notification tokens on your devices.</li>
+        <li>Your clock-in PIN, two-factor settings, and the app&apos;s notification tokens on your devices.</li>
+        <li>You&apos;re taken off future shifts.</li>
       </ul>
 
       <h2 className={h2} style={{ color: "var(--ink)" }}>What your employer keeps</h2>
       <p>
         Your name and your work records (shifts, timecards, pay, and messages you posted to team channels) stay with your
-        employer. Employment and payroll laws require businesses to keep these records. Ask your employer about their own
-        policies for those records.
+        employer. Employment and payroll laws require businesses to keep these records. So do the job application you sent
+        them, and your employer&apos;s payroll or point-of-sale system (such as Square), which keeps its own copy of your
+        contact details. Ask your employer about their policies for those records.
       </p>
 
       <p>
