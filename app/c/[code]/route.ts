@@ -11,7 +11,7 @@ const DEFAULT_MINUTES: Record<string, number> = { call: 15, interview: 30, trial
 
 // RFC 5545: UTC stamps, escaped text, lines folded at 75 octets.
 const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r\n|\r|\n/g, "\\n");
 const fold = (line: string) => {
   const out: string[] = [];
   let rest = line;
