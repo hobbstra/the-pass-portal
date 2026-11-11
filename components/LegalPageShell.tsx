@@ -3,10 +3,13 @@ import PageShell from "./PageShell";
 export default function LegalPageShell({
   title,
   lastUpdated,
+  draft = true,
   children,
 }: {
   title: string;
   lastUpdated: string;
+  /** Help pages (support, delete account) aren't legal text awaiting review. */
+  draft?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -18,7 +21,7 @@ export default function LegalPageShell({
         <p className="text-sm mb-8 font-sans-ui" style={{ color: "var(--ink-muted)" }}>
           Last updated {lastUpdated}
         </p>
-        <div
+        {draft && <div
           className="rounded-lg border px-5 py-4 mb-10 text-sm font-sans-ui"
           style={{ borderColor: "var(--accent-pink)", background: "var(--bg-elevated)", color: "var(--ink)" }}
         >
@@ -26,7 +29,7 @@ export default function LegalPageShell({
           written to accurately describe how The Pass actually works, but it
           has not been reviewed by a lawyer. Have it reviewed before relying
           on it as your final, binding {title.toLowerCase()}.
-        </div>
+        </div>}
         <div className="prose-legal leading-relaxed space-y-4">{children}</div>
       </div>
     </PageShell>
