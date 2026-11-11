@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Support — The Pass" };
 // Support URL for the App Store and Google Play listings.
 export default function Support() {
   return (
-    <LegalPageShell title="Support" lastUpdated="November 10, 2026" draft={false}>
+    <LegalPageShell title="Support" lastUpdated="November 10, 2026">
       <p>
         The Pass runs restaurants and bakeries: The Pass Crew for the team,
         The Pass Admin for owners and managers.

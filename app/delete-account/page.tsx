@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Delete your account — The Pass" };
 // employer for payroll law. Keep this copy matching the in-app dialog.
 export default function DeleteAccount() {
   return (
-    <LegalPageShell title="Delete your account" lastUpdated="November 10, 2026" draft={false}>
+    <LegalPageShell title="Delete your account" lastUpdated="November 10, 2026">
       <h2 className="text-xl font-semibold pt-4" style={{ color: "var(--ink)" }}>
         In the app
       </h2>
